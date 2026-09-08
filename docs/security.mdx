@@ -14,7 +14,7 @@ commands to check them.
 Every Ryoku ISO and every package in the `[ryoku]` repo is signed by the release
 identity `Ryoku Releases <releases@ryoku.dev>`. The canonical public key lives in
 the repo at
-[`keys/ryoku-release-key.pub.asc`](https://github.com/neur0map/ryoku-arch/blob/main/keys/ryoku-release-key.pub.asc),
+[`keys/ryoku-release-key.pub.asc`](https://github.com/ryoku-dev/ryoku-arch/blob/main/keys/ryoku-release-key.pub.asc),
 bound to git history, and ships alongside each ISO.
 
 The key fingerprint to verify against is:
@@ -36,7 +36,7 @@ signature and its checksum:
 
 ```bash
 # Import the release key
-curl -sSL https://raw.githubusercontent.com/neur0map/ryoku-arch/main/keys/ryoku-release-key.pub.asc \
+curl -sSL https://raw.githubusercontent.com/ryoku-dev/ryoku-arch/main/keys/ryoku-release-key.pub.asc \
   | gpg --import
 
 # Show the fingerprint and compare it against the one above

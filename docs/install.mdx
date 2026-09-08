@@ -31,12 +31,12 @@ or Ventoy.
 Every release is signed by `Ryoku Releases <releases@ryoku.dev>`. Always check
 the imported key's fingerprint matches before trusting it. The canonical
 public key lives in the repo at
-[`keys/ryoku-release-key.pub.asc`](https://github.com/neur0map/ryoku-arch/blob/main/keys/ryoku-release-key.pub.asc),
+[`keys/ryoku-release-key.pub.asc`](https://github.com/ryoku-dev/ryoku-arch/blob/main/keys/ryoku-release-key.pub.asc),
 bound to git history.
 
 ```bash
 # Import the release key
-curl -sSL https://raw.githubusercontent.com/neur0map/ryoku-arch/main/keys/ryoku-release-key.pub.asc \
+curl -sSL https://raw.githubusercontent.com/ryoku-dev/ryoku-arch/main/keys/ryoku-release-key.pub.asc \
   | gpg --import
 
 # Show the fingerprint and compare it against the one in the repo

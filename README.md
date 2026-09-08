@@ -1,6 +1,6 @@
 # Ryoku documentation
 
-The public documentation for [Ryoku Arch](https://github.com/neur0map/ryoku-arch),
+The public documentation for [Ryoku Arch](https://github.com/ryoku-dev/ryoku-arch),
 published to https://docs.ryoku.dev with [Mintlify](https://mintlify.com).
 
 ## Structure

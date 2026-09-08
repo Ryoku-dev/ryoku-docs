@@ -54,13 +54,13 @@
     "links": [
       {
         "label": "GitHub",
-        "href": "https://github.com/neur0map/ryoku-arch"
+        "href": "https://github.com/ryoku-dev/ryoku-arch"
       }
     ]
   },
   "footer": {
     "socials": {
-      "github": "https://github.com/neur0map/ryoku-arch",
+      "github": "https://github.com/ryoku-dev/ryoku-arch",
       "website": "https://ryoku.dev"
     }
   },

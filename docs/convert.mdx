@@ -20,7 +20,7 @@ Run this as your **normal user** — not root. The script calls `sudo` only when
 actually needs elevation.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/neur0map/ryoku-arch/main/ryoku-shell-installer/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/ryoku-dev/ryoku-arch/main/ryoku-shell-installer/install.sh | bash
 ```
 
 `install.sh` is a deliberately dumb bootstrap: it checks the machine is Arch-based
@@ -43,7 +43,7 @@ to the installer, add them after `bash -s --`:
 For example, a full dry run that touches nothing:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/neur0map/ryoku-arch/main/ryoku-shell-installer/install.sh \
+curl -fsSL https://raw.githubusercontent.com/ryoku-dev/ryoku-arch/main/ryoku-shell-installer/install.sh \
   | bash -s -- --dry-run
 ```
 
@@ -51,7 +51,7 @@ To fetch the installer and its config payload from a specific git ref instead of
 `main`, set `RYOKU_SHELL_REF`:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/neur0map/ryoku-arch/main/ryoku-shell-installer/install.sh \
+curl -fsSL https://raw.githubusercontent.com/ryoku-dev/ryoku-arch/main/ryoku-shell-installer/install.sh \
   | RYOKU_SHELL_REF=<ref> bash
 ```
 
@@ -123,7 +123,7 @@ The conversion is fully undoable. The reliable way to reverse it is to re-run th
 one-liner with `--uninstall`:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/neur0map/ryoku-arch/main/ryoku-shell-installer/install.sh \
+curl -fsSL https://raw.githubusercontent.com/ryoku-dev/ryoku-arch/main/ryoku-shell-installer/install.sh \
   | bash -s -- --uninstall
 ```
 
