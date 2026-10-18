@@ -1,235 +1,67 @@
 ---
 title: Customization Inventory
-description: The repo paths that ship Ryoku's behavior, where they land at runtime, and what they control.
+description: Where Ryoku's behavior lives in the repo, where it lands at runtime, and which files are yours.
 ---
 
-This is a repo-safe inventory of the text and config files Ryoku ships,
-walked from the current tree under `ryoku/`, `system/`, and `installation/`.
-Paths are repo-relative; runtime targets are generic (`~/.config`, `/usr/share`,
-`/etc`), not machine-specific.
+This is a map of the repo paths that ship Ryoku's behavior and where they land
+on a machine. The authoritative, file-level map is the in-repo
+[`docs/structure.md`](https://github.com/Ryoku-dev/ryoku/blob/main/docs/structure.md);
+this page is the overview.
 
-The same three pillars from the rest of the docs apply here:
+The packages copy the base config to `/usr/share/ryoku/config`, and
+`ryoku materialize` lays it into `~/.config`, replacing Ryoku-owned files but
+never touching your own overrides. See [Customize](/docs/customize) for the
+override files and [Updates](/docs/updates) for how updates apply.
 
-- `ryoku/` lays files into the user's home (mostly under `~/.config`).
-- `system/` ships helpers and policy into the target's `/usr` and `/etc`.
-- `installation/` is what assembles those files onto a machine.
+## The desktop: `ryoku/`
 
-Wallpapers, brand art, font binaries, and `.gitkeep` placeholders are excluded:
-they are assets, not customization surfaces. The `[ryoku]` pacman package
-`ryoku-desktop` copies the base layout to `/usr/share/ryoku/config`; the
-`ryoku materialize` step (from the `ryoku` CLI) copies that tree into
-`~/.config`, replacing Ryoku-owned files but never touching the user's own
-overrides. See [/docs/customize](/docs/customize) for the customization story
-and [/docs/updates](/docs/updates) for how updates apply.
-
-## Hyprland session
-
-The compositor config is authored in Lua. `hyprland.lua` is the entry point
-and `require`s the rest; the load order ends with `user.lua`, so personal
-overrides always win.
-
-| Repo path | Runtime target | What it controls |
+| Path | What it holds | Lands in |
 | --- | --- | --- |
-| `ryoku/hyprland/hyprland.lua` | `~/.config/hypr/hyprland.lua` | Session entry point; loads modules, the active theme, hub settings, and `user.lua`. |
-| `ryoku/hyprland/modules/env.lua` | `~/.config/hypr/modules/env.lua` | Session environment exports (cursor, toolkits, XDG). |
-| `ryoku/hyprland/modules/input.lua` | `~/.config/hypr/modules/input.lua` | Pointer and touchpad behavior. |
-| `ryoku/hyprland/modules/displays.lua` | `~/.config/hypr/modules/displays.lua` | Display defaults that apply before any per-output pin. |
-| `ryoku/hyprland/modules/decoration.lua` | `~/.config/hypr/modules/decoration.lua` | Rounding, gaps, blur, shadow defaults. |
-| `ryoku/hyprland/modules/animations.lua` | `~/.config/hypr/modules/animations.lua` | Window, workspace, and layer animation curves. |
-| `ryoku/hyprland/modules/binds.lua` | `~/.config/hypr/modules/binds.lua` | The keybind set described in [/docs/keybindings](/docs/keybindings). |
-| `ryoku/hyprland/modules/resize.lua` | `~/.config/hypr/modules/resize.lua` | The `Mod+R` resize submap. |
-| `ryoku/hyprland/modules/ryoshot.lua` | `~/.config/hypr/modules/ryoshot.lua` | Screenshot/annotation binds and launches. |
-| `ryoku/hyprland/modules/window_rules.lua` | `~/.config/hypr/modules/window_rules.lua` | Window and layer rules. |
-| `ryoku/hyprland/modules/fullscreen.lua` | `~/.config/hypr/modules/fullscreen.lua` | Fullscreen behavior tweaks. |
-| `ryoku/hyprland/modules/autostart.lua` | `~/.config/hypr/modules/autostart.lua` | Per-session autostart (shell, hub, idle, polkit). |
-| `ryoku/hyprland/keyboard.lua` | `~/.config/hypr/keyboard.lua` | User-owned keyboard layout seed. |
-| `ryoku/hyprland/gpu.lua` | `~/.config/hypr/gpu.lua` | GPU primary-renderer pin, written by `ryoku-gpu`. |
-| `ryoku/hyprland/monitors.lua` | `~/.config/hypr/monitors.lua` | Per-output mode and scale, written by `ryoku-monitor`. |
-| `ryoku/hyprland/monitors_user.lua.example` | `~/.config/hypr/monitors_user.lua.example` | Template for manual monitor pinning; copy to `monitors_user.lua` to use. |
-| `ryoku/hyprland/hypridle.conf` | `~/.config/hypr/hypridle.conf` | Idle timeouts (dim, lock, dpms, suspend). |
+| `ryoku/wm/` | The window-manager seam: the provider contract, the keybind catalogue, and one provider per compositor. | `ryoku-wm-*` binaries |
+| `ryoku/hyprland/` | Hyprland's config as Lua modules, one concern per file. | `~/.config/hypr/` |
+| `ryoku/niri/` | niri's config as KDL, one concern per file. | `~/.config/niri/` |
+| `ryoku/wayfire/` | The experimental Wayfire config. | `~/.config/wayfire/` |
+| `ryoku/shell/` | The shell: the QML UI, the `ryoku-shell` daemon, Ryogami, the `Ryoku.Blobs` plugin, matugen templates and the leaf helper scripts. | `~/.config/quickshell/`, `/usr/bin` |
+| `ryoku/hub/` | Ryoku Settings: the QML pages and the `ryoku-hub` backend. | `~/.config/quickshell/hub/`, `/usr/bin/ryoku-hub` |
+| `ryoku/ui/` | `Ryoku.Ui`, the shared tokens and primitives. | `/usr/lib/qt6/qml/Ryoku/Ui` |
+| `ryoku/cli/` | The `ryoku` command, including `ryoku doctor`. | `/usr/bin/ryoku` |
+| `ryoku/apps/` | Native configs for kitty, ghostty, fish, zsh, bash, starship, nvim, yazi, btop, fastfetch, nautilus, wireplumber and more, plus Ryostore and Ryovm. | `~/.config/<app>/` |
+| `ryoku/lockscreen/` | The qylock lock screen and the SDDM greeter setup. | the greeter and the lock screen |
+| `ryoku/rashin/` | Rashin, the local agent and its dashboard. | `/usr/bin`, `~/.local/share/ryoku/rashin/` |
+| `ryoku/assets/` | Brand art, the shipped wallpapers and the rices (Default, NOC). | `/usr/share/ryoku/` |
+| `ryoku/i18n/` | The translation catalog and its runtimes. | `/usr/share/ryoku/i18n` |
 
-User overrides for the session live alongside the shipped files and are never
-clobbered:
+## The machine: `system/`
 
-| Path | Purpose |
+| Path | What it holds |
 | --- | --- |
-| `~/.config/hypr/user.lua` | Your overrides; loaded last, never shipped, never touched by updates. |
-| `~/.config/hypr/monitors_user.lua` | Hand-pinned outputs (forced modes, modelines, mirror layouts) that autoscale must leave alone. |
-| `~/.config/hypr/settings.lua` | Generated by Ryoku Settings (`Mod+,`); persists hub edits to appearance, displays, binds, autostart, and the shell. |
-| `~/.config/hypr/theme.lua` | Written by theme apply; the active full-system theme's overlay. |
+| `system/boot/` | The boot chain: Limine, Plymouth, the initramfs setup. |
+| `system/hardware/` | Hardware policy and helpers: GPU, power, audio, network. |
+| `system/packages/` | The package sets every install draws from. |
+| `system/services/`, `system/policy/` | System services and polkit policy. |
+| `system/extras/` | The bundle actuator (`ryostore-install`) and its package helpers. |
 
-## Hyprland helper scripts
+## The editions and installers
 
-`ryoku-desktop` also lays the `scripts/` directory beside the Lua config, and
-copies each helper to `/usr/bin` so it works from a keybind or the CLI. The
-shell calls these by absolute path under `~/.config/hypr/scripts/`.
-
-| Repo path | Runtime target | What it controls |
-| --- | --- | --- |
-| `ryoku/hyprland/scripts/ryoku-cmd-caffeine` | `~/.config/hypr/scripts/ryoku-cmd-caffeine`, `/usr/bin/ryoku-cmd-caffeine` | Idle inhibit toggle. |
-| `ryoku/hyprland/scripts/ryoku-cmd-color-picker` | as above | Screen color pick (`Mod+Shift+C`). |
-| `ryoku/hyprland/scripts/ryoku-cmd-google-lens` | as above | Region grab routed to Google Lens. |
-| `ryoku/hyprland/scripts/ryoku-cmd-mirror` | as above | Webcam mirror window. |
-| `ryoku/hyprland/scripts/ryoku-cmd-nightlight` | as above | Color-temperature toggle via `hyprsunset`. |
-| `ryoku/hyprland/scripts/ryoku-cmd-ocr` | as above | Region OCR via `tesseract`. |
-| `ryoku/hyprland/scripts/ryoku-cmd-qr-scan` | as above | Region QR scan via `zbar`. |
-| `ryoku/hyprland/scripts/ryoku-cmd-screenrecord` | as above | Screen record toggle. |
-| `ryoku/hyprland/scripts/ryoku-sysinfo` | as above | System summary surfaced in the pill. |
-| `ryoku/hyprland/scripts/ryoku-profile-stats` | as above | Profile counters for the Hub's profile page. |
-| `ryoku/hyprland/scripts/stash-*.sh` | as above | Stash actions (download, install, compress, cobalt). |
-| `ryoku/hyprland/scripts/cliphist-thumbs.sh` | as above | Clipboard image thumbnails for the pill. |
-| `ryoku/hyprland/scripts/wallpaper-thumbs.sh` | as above | Wallpaper picker thumbnails. |
-| `ryoku/hyprland/scripts/localsend.sh` | as above | LocalSend launcher. |
-| `ryoku/hyprland/scripts/magick-policy` | as above | ImageMagick policy used by `ryoku-cmd-*` tools. |
-
-## Themes
-
-Full-system themes live one directory per theme under `ryoku/hyprland/themes/`.
-Ryoku Settings (Hub) reads the catalogue and applies a theme by writing
-`~/.config/hypr/theme.lua` (and the shell's matching tokens). Each theme dir
-holds the same three files.
-
-| Repo path pattern | Runtime target | What it controls |
-| --- | --- | --- |
-| `ryoku/hyprland/themes/<theme>/theme.json` | (read by the Hub) | Theme metadata, accent, swatch, and the look values (rounding, gaps, blur, shadow, opacity, layout). |
-| `ryoku/hyprland/themes/<theme>/init.lua` | applied through `theme.lua` | Per-theme Hyprland overrides for motion and decoration. |
-| `ryoku/hyprland/themes/<theme>/colors.json` | (read by the shell) | Palette tokens for surfaces that should follow the theme rather than the wallpaper. |
-
-Shipped themes: `aqua`, `cassette`, `catppuccin`, `compact`, `crt`, `default`,
-`drift`, `glass`, `gruvbox`, `mountains`, `nord`, `rose-pine`, `soft_color`,
-`tokyo-night`, `washi`.
-
-## Shell (Quickshell UI + Go daemon)
-
-The shell is one Quickshell tree under `ryoku/shell/quickshell/` driven by
-`ryoku-shell` (the Go daemon under `ryoku/shell/ipc/`). The shell config
-files below are the customizable surfaces; the QML components themselves are
-covered in [/docs/ui-patterns](/docs/ui-patterns).
-
-| Repo path | Runtime target | What it controls |
-| --- | --- | --- |
-| `ryoku/shell/quickshell/pill/` | `~/.config/quickshell/pill/` | The morphing top island, frame border, edge popouts, and centre surfaces (deck, launcher, voice, keyring). |
-| `ryoku/shell/quickshell/sidebar/` | `~/.config/quickshell/sidebar/` | The slide-in panel: audio, network, bluetooth, display, notifications, media. |
-| `ryoku/shell/quickshell/ryoshot/` | `~/.config/quickshell/ryoshot/` | Screenshot capture and annotation. |
-| `ryoku/shell/quickshell/widgets/` | `~/.config/quickshell/widgets/` | Desktop wallpaper widgets (clock faces, weather skies, the widget grid). |
-| `ryoku/shell/quickshell/switcher/` | `~/.config/quickshell/switcher/` | `Alt+Tab` MRU window switcher. |
-| `ryoku/shell/quickshell/visualizer/` | `~/.config/quickshell/visualizer/` | Desktop audio visualiser (`Mod+M`). |
-| `ryoku/shell/wallust/wallust.toml` | `~/.config/wallust/wallust.toml` | Wallust pipeline: palette extraction, fallbacks, and the template list. |
-| `ryoku/shell/wallust/templates/*.tmpl` | `~/.config/wallust/templates/` | Templates rendered on every palette change (shell colors JSON, Hyprland colors Lua, kitty colors). |
-| `ryoku/shell/kde/kdeglobals` | `~/.config/kdeglobals` | Qt/Kvantum color seed so Qt apps follow the desktop palette. |
-| `ryoku/shell/systemd/user/hyprland-session.target` | `~/.config/systemd/user/hyprland-session.target` | The user session target the shell, hub, and helpers bind to. |
-
-The shell's persistent appearance state (live edits from Ryoku Settings) is
-JSON at `~/.config/ryoku/shell.json`, watched by the shell so changes apply
-without a reload.
-
-## Ryoku Settings (Hub)
-
-The Hub is one Qt6/QML app plus a Go backend. Its quickshell config is
-deployed beside the desktop shell.
-
-| Repo path | Runtime target | What it controls |
-| --- | --- | --- |
-| `ryoku/hub/quickshell/` | `~/.config/quickshell/hub/` | The Hub UI: appearance, displays, input, keybinds, lockscreen, animations, autostart, window and layer rules, environment, shell, widgets, extras. |
-| `ryoku/hub/backend/` (installed as `/usr/bin/ryoku-hub`) | `/usr/bin/ryoku-hub` | The data plane: keybind legend, settings generation, extras catalogue cache, TOML state. |
-
-## Apps
-
-Each app keeps its own native format under `ryoku/apps/<app>/`.
-`ryoku materialize` lays them into `~/.config` (or the app's expected home).
-
-| Repo path | Runtime target | What it controls |
-| --- | --- | --- |
-| `ryoku/apps/kitty/kitty.conf` | `~/.config/kitty/kitty.conf` | Kitty defaults: font, padding, color include. |
-| `ryoku/apps/kitty/current-theme.conf` | `~/.config/kitty/current-theme.conf` | Wallust-rendered kitty palette, refreshed on wallpaper change. |
-| `ryoku/apps/fish/config.fish` | `~/.config/fish/config.fish` | Fish prompt wiring, abbreviations, and environment. |
-| `ryoku/apps/starship/starship.toml` | `~/.config/starship.toml` | Prompt layout. |
-| `ryoku/apps/fastfetch/config.jsonc` | `~/.config/fastfetch/config.jsonc` | Fastfetch modules. |
-| `ryoku/apps/fastfetch/ryoku-fastfetch` | `/usr/bin/ryoku-fastfetch` | Launcher wrapper for the shipped fastfetch config. |
-| `ryoku/apps/yazi/yazi.toml` | `~/.config/yazi/yazi.toml` | Yazi keybinds, previewers, and behavior. |
-| `ryoku/apps/nvim/init.lua` | `~/.config/nvim/init.lua` | LazyVim entry. |
-| `ryoku/apps/nvim/lua/` | `~/.config/nvim/lua/` | Plugin and options modules. |
-| `ryoku/apps/nvim/ryoku-nvim.desktop` | (default editor handler) | The `.desktop` file that `mimeapps.list` points text MIME types at. |
-| `ryoku/apps/nautilus/` | `~/.config/nautilus/` | Nautilus-side preferences. |
-| `ryoku/apps/npm/npmrc` | `~/.config/npm/npmrc` | npm user-prefix to `~/.local` so global installs work without root. |
-| `ryoku/apps/pip/pip.conf` | `~/.config/pip/pip.conf` | Allows `pip install --user` against the system Python. |
-| `ryoku/apps/mimeapps.list` | `~/.config/mimeapps.list` | Default apps (editor handler, file manager, browser). |
-
-## Lockscreen and greeter
-
-| Repo path | Runtime target | What it controls |
-| --- | --- | --- |
-| `ryoku/lockscreen/qylock/quickshell-lockscreen/` | `~/.local/share/quickshell-lockscreen/` | In-session lock screen (the same surface SDDM uses). |
-| `ryoku/lockscreen/qylock/themes/clockwork/orbital/` | `/usr/share/sddm/themes/ryoku/`, `~/.local/share/qylock/themes/` | The shipped greeter theme. |
-| `ryoku/lockscreen/sddm/setup` | (run on install) | Enables SDDM, sets the graphical target, strips `pam_gnome_keyring` from the SDDM PAM stack, ensures a Hyprland session file exists. |
-| `ryoku/lockscreen/install-qylock` | (run on install) | Installs the qylock greeter, wires `/etc/sddm.conf.d/99-ryoku.conf`, and seeds `~/.config/qylock/theme`. |
-
-## System (boot, hardware, extras)
-
-`system/` ships files into the target's `/usr`, `/etc`, and `/boot`.
-
-### Boot
-
-| Repo path | Runtime target | What it controls |
-| --- | --- | --- |
-| `system/boot/limine/limine.conf` | `/boot/limine.conf` | Limine global config: branding (orange `F25623`), `term_palette`, timeout, default entry placeholder. |
-| `system/boot/limine/default.conf` | `/etc/default/limine` | Read by `limine-mkinitcpio-hook` to build the UKI and write the real boot entries (kernel cmdline, UKI name, snapshot count). |
-| `system/boot/mkinitcpio/ryoku.conf` | applied into `/etc/mkinitcpio.conf` | HOOKS line (adds `plymouth`, `kms`, `encrypt` when LUKS, etc.). |
-| `system/boot/plymouth/ryoku/` | `/usr/share/plymouth/themes/ryoku/` | Boot splash theme. |
-
-### Hardware helpers
-
-`ryoku-desktop` ships each helper to `/usr/bin`; Hyprland autostart, Lua
-keybinds, and the shell call them by bare name.
-
-| Repo path | Runtime target | What it controls |
-| --- | --- | --- |
-| `system/hardware/gpu/ryoku-gpu` | `/usr/bin/ryoku-gpu` | GPU detection, primary-renderer pin (writes `gpu.lua`). |
-| `system/hardware/gpu/ryoku-gpu-detect` | `/usr/bin/ryoku-gpu-detect` | Probes the GPU inventory for the Hub. |
-| `system/hardware/gpu/90-ryoku-gpu.rules` | `/usr/lib/udev/rules.d/90-ryoku-gpu.rules` | Boot-stable `/dev/dri/ryoku-gpu-*` symlinks. |
-| `system/hardware/display/ryoku-monitor` | `/usr/bin/ryoku-monitor` | DPI-derived autoscale (writes `monitors.lua`). |
-| `system/hardware/audio/ryoku-mic` | `/usr/bin/ryoku-mic` | Mic-gain normalizer. |
-| `system/hardware/leds/ryoku-leds` | `/usr/bin/ryoku-leds` | OpenRGB accent sync. |
-| `system/hardware/power/ryoku-hw-laptop` | `/usr/bin/ryoku-hw-laptop` | Shared laptop/desktop detector used by GPU and idle policy. |
-| `system/hardware/power/ryoku-idle` | `/usr/bin/ryoku-idle` | Laptop-gated `hypridle` launcher. |
-| `system/hardware/drivers/{nvidia,intel,amd,vulkan}.sh` | (run by the installer) | Per-vendor driver install steps. |
-
-### Extras (Hub bundles)
-
-`ryoku-desktop` ships these to `/usr/bin`. The Hub's Extras section drives
-them; see [/docs/plugins](/docs/plugins).
-
-| Repo path | Runtime target | What it controls |
-| --- | --- | --- |
-| `system/extras/ryoku-extras-install` | `/usr/bin/ryoku-extras-install` | Bundle actuator: installs, removes, reports items defined in the `ryoku-extras` catalogue. |
-| `system/extras/ryoku-pkg-add` | `/usr/bin/ryoku-pkg-add` | `pacman -S` wrapper for repo packages. |
-| `system/extras/ryoku-pkg-aur-add` | `/usr/bin/ryoku-pkg-aur-add` | AUR install wrapper (yay/paru). |
-| `system/extras/ryoku-pkg-remove` | `/usr/bin/ryoku-pkg-remove` | Remove packages and now-orphaned deps. |
-| `system/extras/ryoku-pkg-multilib` | `/usr/bin/ryoku-pkg-multilib` | Enable `[multilib]` for bundles that need it. |
-| `system/extras/ryoku-cmd-present` | `/usr/bin/ryoku-cmd-present` | Shared presence test (`command -v`). |
-
-### Package sets
-
-`pacstrap` and the post-install AUR step read these.
-
-| Repo path | Role |
+| Path | What it holds |
 | --- | --- |
-| `system/packages/base.packages` | Every machine, pacstrapped on install. |
-| `system/packages/dev.packages` | Toolchains, pacstrapped on install. |
-| `system/packages/hardware.packages` | Per-profile microcode and GPU drivers. |
-| `system/packages/aur.packages` | Built post-install by the AUR step. |
+| `installation/` | The installer TUI, the backend, the shared choice catalogue (`installerplan/`) and the Arch and CachyOS ISO profile. |
+| `ryoku-shell-installer/` | The script installer for existing Arch, CachyOS, Void and Fedora systems. |
+| `void/` | Void's package translations, its runit service translations and its ISO. |
+| `fedora/` | Fedora's package translations and RPM specs. |
+| `release/` | The `[ryoku]` PKGBUILDs, the repository builder and the release tooling. |
 
-## Per-user overrides that survive updates
+## Files that are yours
 
-Updates use the same one-way `repo to system` flow ([/docs/updates](/docs/updates)).
-`ryoku materialize` clobbers files it owns and prunes dropped ones, but the
-files below are yours and never touched.
+Ryoku never overwrites these on an update:
 
-| Path | What it is |
+| File | What it is for |
 | --- | --- |
-| `~/.config/hypr/user.lua` | Personal Hyprland overrides, loaded last. |
-| `~/.config/hypr/monitors_user.lua` | Hand-pinned outputs that override autoscale. |
-| `~/.config/hypr/settings.lua`, `~/.config/hypr/theme.lua` | Generated by the Hub and theme apply; preserved across redeploys. |
-| `~/.config/ryoku/shell.json` | Live shell appearance state from Ryoku Settings. |
-| `~/.local/state/ryoku/` | `ryoku` CLI state: `repo`, `deployed`, `materialized`, `doctor-report.txt`. |
-| `~/Pictures/Wallpapers/` | Drop wallpapers here; `Mod+W` cycles, `Mod+C` opens the picker. |
+| `~/.config/ryoku/user_edits/` | Every change you make in Ryoku Settings, laid back over the shipped config on each update. `ryoku reset` hands a file back. |
+| `~/.config/hypr/user.lua`, `~/.config/niri/user.kdl` | Your own window-manager overrides, loaded last. |
+| `monitors_user.lua`, `monitors_user.kdl` | Hand-pinned displays. |
+| `~/.config/kitty/user.conf`, `~/.config/fish/user.fish` | Per-app overrides. |
+| `~/.config/ryoku/plugins.json` | Plugin placement and settings. |
+
+`ryoku owner <path>` tells you which class any config file belongs to and where
+your change should go; see [The ryoku command](/docs/cli).

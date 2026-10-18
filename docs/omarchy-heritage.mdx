@@ -1,114 +1,78 @@
 ---
 title: Omarchy heritage
-description: What Ryoku adapts from upstream projects, what is Ryoku-owned, and where to find the attribution.
+description: Where Ryoku came from, what it adapts from upstream projects, what is Ryoku-owned, and where to find the attribution.
 ---
 
-Ryoku is a premium Arch workstation environment. Its runtime, command surface,
-and shell are Ryoku-owned. Selected ideas and code were adapted from upstream
-projects for speed, ergonomics, and rendering work that did not need to be
-reinvented.
+Ryoku's runtime, command surface, installer and shell are Ryoku-owned. Selected
+ideas and code are adapted from upstream projects, each credited in the
+repository's [`NOTICE`](https://github.com/Ryoku-dev/ryoku/blob/main/NOTICE),
+which is the authoritative list.
 
 ## Where Ryoku comes from
 
-Ryoku draws from three upstream sources, all credited in the repository's
-[`NOTICE`](https://github.com/ryoku-dev/ryoku-arch/blob/main/NOTICE):
+Ryoku's alpha series (through v0.1.1-alpha) began as a fork of
+[Omarchy](https://github.com/basecamp/omarchy) by David Heinemeier Hansson and
+contributors. The beta tree was pruned and rebuilt from an empty root: its
+installer, shell, theming, boot art, tooling and system definition are Ryoku's
+own.
 
-- **Omarchy** ([basecamp/omarchy](https://github.com/basecamp/omarchy)) is the
-  ancestor of Ryoku's install architecture, command patterning, and
-  maintenance instincts. Ryoku began as an Omarchy-derived Arch environment,
-  then diverged into its own packaging, shell, and CLI. The MIT license and
-  original copyright notice for the Omarchy-derived core are preserved at
-  `LICENSES/MIT-Omarchy-Ryoku-core.txt`.
-- **Caelestia** ([caelestia-dots/shell](https://github.com/caelestia-dots/shell))
-  is the source the Ryoku shell adapts the frame-blob rendering from. The
-  `Ryoku.Blobs` QML/C++ plugin and parts of the shell's animation and motion
-  curves derive from Caelestia and remain under GPL-3, compatible with
-  Ryoku's GPL-3.
-- **DankMaterialShell**
-  ([AvengeMedia/DankMaterialShell](https://github.com/AvengeMedia/DankMaterialShell))
-  is the source for portions of the Ryoku display configuration UI in the Hub.
-  It is MIT-licensed; copyright (c) 2025 Avenge Media LLC. The notice is
-  preserved in the repository's `NOTICE`.
+## What Ryoku adapts
 
-The whole project is distributed under GPL-3. Adapted portions keep their
-original licenses where required, and `NOTICE` records the attribution.
+| Upstream | What Ryoku adapts | License |
+| --- | --- | --- |
+| [Caelestia](https://github.com/caelestia-dots/shell) | The frame-blob rendering (the `Ryoku.Blobs` plugin) and parts of the animation and motion curves. | GPL-3.0 |
+| [DankMaterialShell](https://github.com/AvengeMedia/DankMaterialShell) | Portions of the display configuration UI in Ryoku Settings. | MIT |
+| [OkShell](https://github.com/JohnOberhauser/OkShell) | The configurable frame-bar layout and the Bar Studio workflow. | GPL-3.0 |
+| [Quickshell Rise](https://github.com/HANCORE-linux/quickshell-dots) | The QS Bar style, ported onto Ryoku's palette and services. | MIT |
+| [Omarchy quattro](https://github.com/basecamp/omarchy) | The Nomarchy bar style. | MIT |
+| [iNiR](https://github.com/snowarch/inir) | The Shima bar style, renamed and run through Ryoku's window-manager layer. It is not iNiR or iRiS. | GPL-3.0 with section 7 terms |
+| [Serpantinum](https://github.com/ilyamiro/serpantinum) | The Python bar style. | AGPL-3.0 or later |
+| [ii-p3drovfx](https://github.com/P3DROVFX/ii-p3drovfx) (after [ii-vynx](https://github.com/vaguesyntax/ii-vynx) and [illogical-impulse](https://github.com/end-4/dots-hyprland)) | The Stage Editor, the ii dock design, and Kit's dev tools, commands, typing test and phone tabs. | GPL-3.0 |
+| [Monkeytype](https://github.com/monkeytypegame/monkeytype) | The typing test's word lists and key sounds. | GPL-3.0 |
+| The freedesktop.org sound theme | The built-in desktop sounds. | GPL-2.0+, CC BY 3.0, CC BY-SA |
+
+The whole project is distributed under GPL-3.0. Adapted portions keep their
+original licenses, and each port ships its upstream license and notice beside
+the code.
 
 ## How to read names and surfaces
 
 - Current runtime behavior is Ryoku-owned. Anything you use day to day belongs
-  to the Ryoku surface: the `ryoku` CLI, Ryoku Settings, the Quickshell UI,
-  `~/.config/hypr`, `~/.config/quickshell/hub`, the `[ryoku]` package repo.
+  to the Ryoku surface: the `ryoku` command, Ryoku Settings, the shell, Ryogami,
+  Ryostore and the signed Ryoku repositories.
 - Historical names that still appear in the tree are there for attribution,
   legal hygiene, or because they point at external objects that still exist.
-- The `LICENSE` and `NOTICE` files at the repo root are required attribution
-  for inherited components and their open-source licenses. They stay.
+- The `LICENSE` and `NOTICE` files at the repo root are required attribution.
+  They stay.
 
 ## What does not ship as active runtime
 
-These names belong to the lineage, not to the current desktop. None of them
-ship as part of Ryoku's runtime:
+These names belong to the lineage, not to the current desktop:
 
-- **Waybar** is not the bar. The Ryoku bar is the Quickshell `pill` and its
-  popouts, under `ryoku/shell/quickshell/pill/`.
+- **Waybar** is not the bar. The bar is one of the shell's bar styles.
 - **Mako** is not the notifier. Notifications surface through the shell.
 - **SwayOSD** is not used.
-- **Tofi, Walker, and Elephant** are not the launcher. The launcher is
-  `ryoku-shell launcher`, bound to `Mod+Space`.
-- Prototype runtime trees used during the transition out of Omarchy are gone.
-- Old boot branding assets, Omarchy package repo URLs, keyring URLs, and
-  mirror URLs are not part of Ryoku's package or update plumbing. Ryoku ships
-  from the signed `[ryoku]` repo (`release/packages/`).
+- **Tofi, Walker and Elephant** are not the launcher. The launcher is part of
+  the shell, on `Mod + Space`.
+- Omarchy package repositories, keyrings and mirrors are not part of Ryoku's
+  update plumbing. Ryoku ships from its own signed repositories.
 
-If you find documentation, scripts, or screenshots that reference these names
-as live runtime, treat them as stale.
-
-## Current Ryoku surfaces
-
-The Ryoku-owned surfaces a user or maintainer actually touches:
-
-| Surface | Current meaning |
-|---|---|
-| The `ryoku` command | The system front door: `update`, `status`, `rollback`, `snapshots`, `reload`, `materialize`, `doctor`, `recovery`. |
-| `[ryoku]` pacman repo | Signed packages: `ryoku-desktop`, `ryoku-shell`, `ryoku-hub`, `ryoku`, `ryoku-blobs`, `ryoku-keyring`. |
-| `ryoku-desktop` package | Umbrella package; lays the base config under `/usr/share/ryoku/config`. |
-| `~/.config/hypr/` | Hyprland config (authored in Lua), deployed from `ryoku/hyprland/`. Personal overrides live in `~/.config/hypr/user.lua`. |
-| `~/.config/quickshell/` | The Quickshell desktop UI, including `hub/` for Ryoku Settings. |
-| Ryoku Settings (`Mod+,`) | The control center, writes `~/.config/hypr/settings.lua` and shell config. |
-| `~/.local/state/ryoku/` | Runtime state for the CLI: `repo`, `deployed`, `materialized`, `doctor-report.txt`. |
-
-There is no migration ledger and no channel switching. Configuration is
-reconciled declaratively by `ryoku materialize`; stateful drift is reconciled
-by `ryoku doctor`. See [Updates](/docs/updates) for the runtime flow and
-[Maintenance](/docs/maintenance) for the contributor flow.
-
-## Compatibility bridges
-
-A small set of `OMARCHY_*` environment variables may remain as compatibility
-bridges for legacy scripts or pre-cutover system states. They exist only to
-keep older invocations working while the migration to Ryoku-owned names lands.
-New code reads and writes the Ryoku-owned names (`RYOKU_REPO`,
-`RYOKU_CONFIG_BASE`, `RYOKU_CHANNEL`, `RYOKU_DRYRUN`); never introduce a new
-`OMARCHY_*` name.
+If you find documentation, scripts or screenshots that reference these names as
+live runtime, treat them as stale.
 
 ## How to review a historical reference
 
 When you find a legacy name in the tree, classify it before changing it:
 
-1. **Attribution.** Keep it if it preserves required notices or upstream
-   credit (`LICENSE`, `NOTICE`, `LICENSES/MIT-Omarchy-Ryoku-core.txt`).
-2. **External identifier.** Keep package, repo, or remote IDs that must stay
+1. **Attribution.** Keep it if it preserves required notices or upstream credit.
+2. **External identifier.** Keep package, repo or remote IDs that must stay
    aligned with published upstream objects.
-3. **Compatibility bridge.** Keep an `OMARCHY_*` env var only when removing
-   it would break a legacy invocation that has not been retired.
-4. **Active runtime.** Anything that affects current behavior belongs in a
+3. **Active runtime.** Anything that affects current behavior belongs in a
    Ryoku-owned surface and should not leak historical naming. Rename or remove
    it.
 
-For active maintenance work, [Maintenance](/docs/maintenance) is the spine.
-This page only covers heritage and attribution.
-
 ## See also
 
-- [Vision](/docs/vision) for Ryoku's framing as a Ryoku-owned environment.
+- [Vision](/docs/vision) for what Ryoku is.
 - [Maintenance](/docs/maintenance) for how changes ship to users.
 - [Updates](/docs/updates) for the runtime update model.

@@ -1,198 +1,121 @@
 ---
 title: Maintenance
-description: How a change reaches a Ryoku user, the commit gates that catch problems before it does, and where to put new code.
+description: How a change reaches a Ryoku user, the gates a commit passes on the way, and where new code belongs.
 ---
 
-How to maintain the Ryoku Arch repository: the dev loop, the gates a commit
-passes, the path a change takes from the repo to a user's machine, and where
-new code belongs.
+How to work in the [Ryoku repository](https://github.com/Ryoku-dev/ryoku): the
+dev loop, the gates a commit passes, the path a change takes from the repo to a
+user's machine, and where new code belongs.
 
-The spine for this page is the in-repo [`docs/development.md`](https://github.com/ryoku-dev/ryoku-arch/blob/main/docs/development.md);
-that file overrides anything that drifts here.
+The in-repo guides are the source of truth and override anything that drifts
+here: [`AGENTS.md`](https://github.com/Ryoku-dev/ryoku/blob/main/AGENTS.md),
+[`CONTRIBUTING.md`](https://github.com/Ryoku-dev/ryoku/blob/main/CONTRIBUTING.md),
+[`docs/development.md`](https://github.com/Ryoku-dev/ryoku/blob/main/docs/development.md)
+and [`docs/updates.md`](https://github.com/Ryoku-dev/ryoku/blob/main/docs/updates.md).
 
 ## The dev loop
 
-Edit the repo, deploy, test on the running system. Never edit `~/.config`
-directly and try to copy it back; the flow is repo to system only.
+Ryoku is developed on a running Ryoku machine. Edit the repo, deploy, test on
+the running system. Never edit `~/.config` directly and copy it back; the flow
+is repo to system only.
 
-- **Shell (QML and the Go daemon).** `ryoku/shell/dev-run.sh` builds
-  `ryoku-shell` and runs it from the checkout (`qs -p`, hot reload).
-  `ryoku/shell/dev-binds.sh on` binds the shell keys to the dev shell for the
-  current session; `ryoku/shell/dev-stop.sh` stops it. Your own `~/.config` is
-  left alone.
-- **Configs and binaries from a maintainer checkout.** `ryoku deploy` builds
-  the binaries and lays the repo into `~/.config` from a checkout (it calls
-  `ryoku/shell/deploy.sh`). On an installed system this is replaced by
-  `ryoku materialize`, which copies the base config in from
-  `/usr/share/ryoku/config`. The `ryoku` CLI auto-detects which world it is
-  in; you do not pick a mode.
+```bash
+ryoku/shell/dev-run.sh       # build ryoku-shell and run it from the checkout (hot reload)
+ryoku/shell/dev-binds.sh on  # bind the shell keys to the dev shell for this session
+ryoku/shell/dev-stop.sh      # stop the dev shell
+ryoku/shell/deploy.sh        # lay the repo into ~/.config and rebuild the binaries
+```
 
-## Verify before committing
-
-The gates below are mechanical. Run them on the running system; do not stop at
-"it parses".
-
-- **Lua:** `luac -p <file>` parses every changed Lua file.
-- **Shell scripts:** `bash -n <file>`; the pre-commit hook also checks staged
-  scripts.
-- **Installer:** run the backend with `RYOKU_DRYRUN=1` (and the required
-  `RYOKU_*` contract variables) to print every action without touching a disk.
-- **QML:** `qmllint` when available.
-- **Behavior:** exercise the actual change on the running system. Parse-only
-  passes do not prove behavior.
+`dev-run.sh` leaves your own `~/.config` alone. On an installed system the same
+config arrives through `ryoku materialize`, which lays the base config in from
+the packages; the `ryoku` command detects which world it is in.
 
 ## How a change reaches a user
 
-Where a change lives in the repo decides whether, and how, it reaches an
-installed machine. There are four paths and no others.
+A dev box runs the checkout; users run packages. Where a change lives decides
+how it gets there.
 
-| Source location | Reaches existing installs | Reaches new installs | Vehicle |
-|---|---|---|---|
-| `ryoku/` (desktop config and binaries) | Yes, on the next `ryoku update` | Yes | Signed `[ryoku]` pacman repo, then `ryoku materialize` re-lays the base config (override-safe). |
-| `system/packages/` (a newly listed package) | No | Yes | Pacstrapped by the installer. `ryoku update` upgrades installed packages but does not pacstrap newly listed ones. |
-| `installation/` (the installer) | No | Yes | Runs once from the ISO; fixes here reach only new installs from a new ISO. |
-| Stateful drift the layers above cannot express | Yes, on the next `ryoku update` | Yes | An idempotent `ryoku doctor` reconciler runs inside `ryoku update`. |
+| Change | Vehicle |
+| --- | --- |
+| Desktop config and binaries (`ryoku/`) | Signed packages, then `ryoku materialize` re-lays the base config on the next `ryoku update`. User edits live in `~/.config/ryoku/user_edits` and survive. |
+| A new default app or package | The edition's package set for new installs, and the provisioning manifest so existing installs receive it once. Apps a user left out stay out. |
+| The installers (`installation/`, `ryoku-shell-installer/`) | New installs only. A change to the script installer means rebuilding its committed binary and checksum. |
+| Stateful drift nothing above can express | An idempotent `ryoku doctor` reconciler, which runs inside every `ryoku update`. |
 
-There is **no ordered migration ledger**. Configuration is reconciled
-declaratively by `ryoku materialize`; stateful drift (disk layout, subvolumes,
-swap, ownership, missing units) is reconciled by `ryoku doctor`. Reach for a
-reconciler only when a fix must change an existing machine's structure and
-neither a package nor `materialize` can do it.
+There is no ordered migration ledger. A removed or renamed `shell.json` key
+needs a doctor reconciler, and `bin/ryoku-dev-verify-delivery` checks that
+every shipped config reaches users.
 
-A desktop change lands on users only after a tagged release rebuilds the
-`[ryoku]` repo. See [Release pipeline](/docs/release-pipeline) for how a tag
-becomes a signed package.
-
-<Callout type="info">
-The materialize boundary: anything Ryoku ships under `ryoku/` is re-laid by
-`ryoku materialize` and treated as owned by the package. User files in
-`~/.config` (including `~/.config/hypr/user.lua`, `~/.config/hypr/monitors_user.lua`,
-and the per-app `user.*` overrides) are never touched. Drop a personal override
-into `user.lua`; do not edit a shipped file.
-</Callout>
-
-## Adding things: the decision map
-
-Put new code where the existing pattern says it goes. If a similar thing is
-already in the tree, follow it.
+## Where new code goes
 
 | Intent | Where it goes |
-|---|---|
-| A package every machine should have | The matching set in `system/packages/`: `base.packages` for everyone, `dev.packages` for toolchains, `hardware.packages` per profile, `aur.packages` for the AUR. Prefer official repos over the AUR when both have it. |
-| A keybind | `ryoku/hyprland/modules/binds.lua`. One concern per module; do not grow an unrelated module. |
-| A Hyprland concern (animations, window rules, autostart, input, displays, decoration, an idle behavior) | A new module under `ryoku/hyprland/modules/` plus one `require` in `ryoku/hyprland/hyprland.lua`. Never inline multi-step shell into Lua. |
-| A shell surface (a new pill popout, a new sidebar pane, a new island) | A component under `ryoku/shell/quickshell/` with any state wired through `ryoku-shell` (`ryoku/shell/ipc/`). QML renders; the Go daemon decides. |
-| A system helper that runs shell logic | A `ryoku-<thing>` script under `system/hardware/.../`, shipped to `/usr/bin` by the `ryoku-desktop` package (its PKGBUILD installs every `system/hardware/*/ryoku-*`), and invoked by name from Lua autostart or a keybind. |
-| A new app's native config | `ryoku/apps/<app>/` with the tool's own format (`kitty.conf`, `yazi.toml`, `starship.toml`, `wallust.toml`, and so on). Do not invent a Lua wrapper for a tool that reads its own format. |
-| A new full-system theme | `ryoku/hyprland/themes/<theme>/`. Ryoku Settings applies it. |
+| --- | --- |
+| A package every machine should have | The matching set in `system/packages/`, plus its rows in the Void and Fedora translation tables. Prefer official repositories over the AUR. |
+| A keybind | The neutral catalogue in `ryoku/wm/binds.go`; each compositor provider renders it. |
+| A compositor concern | That compositor's own config: Lua modules under `ryoku/hyprland/`, KDL under `ryoku/niri/`. Nothing outside `ryoku/wm/` names a compositor; the desktop asks capabilities. |
+| A shell surface | A component under `ryoku/shell/quickshell/`, with its state wired through `ryoku-shell` (`ryoku/shell/ipc/`). QML renders; the Go daemon decides. |
+| A Ryoku Settings page or control | The Hub under `ryoku/hub/`, with the logic in its Go backend. |
+| A doctor reconciler | A file under `ryoku/cli/internal/doctor/`, registered in its list. Idempotent, cheap to check, safe to repeat. |
+| A new app's native config | `ryoku/apps/<app>/` in the tool's own format. Never a Lua wrapper for a tool that reads its own config. |
+| A new `[ryoku]` package | `release/packages/<name>/`, with its Fedora spec and Void template beside the other editions' builds. |
 
-### Adding a doctor reconciler
+## Verify before committing
 
-A reconciler is one entry in `reconcilers()` in `ryoku/cli/doctor.go`. It runs
-on every `ryoku update`, so:
+Test behavior on the running system, not only that a file parses:
 
-- **Be idempotent.** Report `ok` when the machine already matches the desired
-  state, otherwise converge. Under `--check`, report what it would do without
-  changing anything.
-- **Keep the check cheap and the fix safe to repeat.**
-- **Auto-fix only the exact known-safe case** and warn on anything unexpected.
-- **Retire it** once every supported install has run it, so the set stays
-  small instead of piling up.
+- **Lua:** `luac -p <file>`.
+- **Shell scripts:** `bash -n <file>`; `shellcheck` runs on push.
+- **QML:** `qmllint`, and `bin/ryoku-dev-lint-qml` on a dev box.
+- **Go:** `go build ./... && go vet ./... && go test ./...` in each module you
+  touched.
+- **Installer:** run the backend with `RYOKU_DRYRUN=1` to print every action
+  without touching a disk.
+- **The seam and delivery:** `bin/ryoku-dev-verify-wm-isolation` and
+  `bin/ryoku-dev-verify-delivery`.
 
-### Adding a package to `[ryoku]`
+## Commits
 
-A new pacman package gets its own directory under `release/packages/<name>/`
-with a PKGBUILD that builds from the checked-out monorepo. `release/repo/build-repo.sh`
-runs `makepkg`, signs every artifact with the release key, and `repo-add`s the
-signed `ryoku.db` into `out/`. See [Release pipeline](/docs/release-pipeline)
-for the full pipeline and the CI workflows.
+Every commit passes the hooks in `.githooks/`; install them with
+`bin/ryoku-dev-install-hooks`. **Never use `--no-verify`.**
 
-## Binaries and package managers
+- The subject is `[area] scope: imperative summary`, 72 characters or fewer,
+  no trailing period. The area is one of `global`, `installation`, `system`,
+  `ryoku`, `docs`, `test`, `tooling`, `release`.
+- No em-dash anywhere, no authorship or attribution trailers, no filler.
+- One logical change per commit, with the matching `CHANGELOG.md` entry.
+- Anything a user would notice gets a plain-language trailer that the release
+  bot collects into the release notes:
 
-- The desktop ships as **signed pacman packages** from the `[ryoku]` repo
-  (`release/packages/`): `ryoku-shell`, `ryoku-hub`, `ryoku`, and
-  `ryoku-blobs` build from source via their PKGBUILDs; `ryoku-desktop` is the
-  umbrella; `ryoku-keyring` carries the release key.
-- The live ISO still prebuilds the installer TUI (`installation/iso/build.sh`).
-  The installed desktop's binaries come from the repo, so **never assume `go`
-  exists at install time**.
-- AUR packages install in the post-install step (`installation/backend/lib/aur.sh`),
-  not via pacstrap.
-- User-level package managers install without root, into `~/.local/bin`: `npm`,
-  `pip --user`, `go install`, `cargo install`, `pipx`, `mise`. Do not
-  reintroduce root-global installs or assume `sudo` for user tooling.
-
-## Commit gates
-
-Every commit passes the hooks in `.githooks/`. **Never use `--no-verify`.**
-
-- **`commit-msg`.** Subject is `[area] scope: imperative summary` where area
-  is one of `global`, `installation`, `system`, `ryoku`, `docs`, `test`,
-  `tooling`, `release`. (Shell changes use `[global]`.) The hook rejects:
-  - Any other or missing area label.
-  - Any em-dash (U+2014) anywhere in the message.
-  - Authorship / `Co-authored-by:` trailers.
-  - Generated-content attribution phrases (mentions of generators, AI tools,
-    or "generated with" wording).
-- **`pre-commit`.** Scans staged additions and rejects:
-  - Em-dash (U+2014) in text files (Markdown, shell, Lua, YAML, JSON, TOML,
-    config, README, NOTICE, LICENSE).
-  - `bash -n` syntax errors in staged shell scripts.
-  - Low-value filler comment lines (via `bin/ryoku-dev-scan-slop --staged`).
-- **`pre-push`.** Runs `shellcheck` on changed shell when installed.
-
-Install the hooks per clone with `bin/ryoku-dev-install-hooks`, which sets
-`core.hooksPath = .githooks` and makes the hooks executable. Re-run after
-pulling hook changes; the operation is idempotent.
-
-```bash
-cd ryoku-arch
-bin/ryoku-dev-install-hooks
-git config --get core.hooksPath        # should print: .githooks
+```text
+Note: New: pin an app by right-clicking it in the dock
+Note: Fixed: right-clicking a dock app now saves or removes the pin
+Note: Removed: the old instant-replay buffer
 ```
 
-### Subject labels at a glance
+## Branches
 
-| Label | Use it when |
-|---|---|
-| `[global]` | The change touches the Ryoku desktop (`ryoku/`), including the shell. |
-| `[installation]` | The change is in `installation/` (the TUI, the backend, or the ISO profile). |
-| `[system]` | The change is in `system/` (boot chain, hardware policy, package sets, extras). |
-| `[ryoku]` | The change is in the `ryoku` CLI (`ryoku/cli/`). |
-| `[docs]` | Documentation-only change (in-repo `docs/`, README, NOTICE). |
-| `[test]` | Test-only change (`tests/`). |
-| `[tooling]` | Repo tooling, hooks, CI, `bin/ryoku-dev-*`, `bin/ryoku-release-*`. |
-| `[release]` | Version bumps, changelog, release automation, `release/`. |
-
-One logical change per commit. Update the matching `CHANGELOG.md` for the area
-you touched.
+Work goes to `unstable-dev`. Every push there runs the **Testing gate**, which
+waits for the required checks and then records the commit for testers on
+`ryoku track unstable`; the package publishers run the same gate before they
+upload the testing repositories. `main` only moves by a fast-forward from
+`unstable-dev` when a release is ready, and a release is the **Stable Release**
+workflow run on `main`. See [Release pipeline](/docs/release-pipeline).
 
 ## Writing prose
 
-- **No em-dash.** Use a comma, a colon, a period, parentheses, or `" - "` with
-  spaces. The pre-commit hook enforces this in committed text.
-- **No emoji.** No marketing fluff. Plain, direct, technical prose.
-- **Match existing files next to yours.** When in doubt, copy the structure of
-  the closest neighbour.
-- **Comment the *why* when it is not obvious.** Never narrate the *what*,
-  never leave commented-out code, never pad with filler.
-
-## Research
-
-When something is unfamiliar, look it up against primary sources: the Arch
-Wiki, the Hyprland wiki, the Quickshell and Qt docs, each tool's own docs.
-Cross-check anything load-bearing, and confirm the result on the running
-system. Match an existing pattern in the repo over introducing a new one.
-There is one source for each config, value, and fact: if a thing must exist in
-two places, extract it to one and reference it.
+- **No em-dash.** Use a comma, a colon, a period or parentheses.
+- **No emoji, no marketing fluff.** Plain, direct, technical prose.
+- **Match the files next to yours.** When in doubt, copy the closest neighbour.
+- **Comment the *why* when it is not obvious.** Never narrate the *what* or
+  leave commented-out code.
 
 ## See also
 
-- [Updates](/docs/updates) for the runtime side: what `ryoku update`, snapshots,
-  rollback, `doctor`, and recovery do.
-- [Release pipeline](/docs/release-pipeline) for the path from a tag to a
-  signed `[ryoku]` repo.
-- [ISO build recipe](/docs/iso-build-recipe) for building and verifying a
-  local ISO.
-- [Omarchy heritage](/docs/omarchy-heritage) for what Ryoku adapts and what
-  is Ryoku-owned.
+- [Updates](/docs/updates) for the runtime side: `ryoku update`, snapshots,
+  rollback, `doctor` and recovery.
+- [Release pipeline](/docs/release-pipeline) for the path from a commit to the
+  signed repositories.
+- [ISO build recipe](/docs/iso-build-recipe) for building and verifying a local
+  ISO.
+- [Omarchy heritage](/docs/omarchy-heritage) for what Ryoku adapts and what is
+  Ryoku-owned.

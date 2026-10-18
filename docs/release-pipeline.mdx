@@ -1,276 +1,104 @@
 ---
 title: Release Pipeline
-description: How the signed [ryoku] pacman repo and the live ISO are built, signed, and published from this monorepo.
+description: How a commit becomes a testing build, how a release becomes signed packages and ISOs, and how to verify them.
 ---
 
-Ryoku ships two release artifacts:
+Ryoku ships three kinds of artifact, all signed with the same release key:
 
-- The signed `[ryoku]` pacman repository at
-  `https://repo.ryoku.dev/stable/$arch/`, which holds every Ryoku package
-  (`ryoku-shell`, `ryoku-hub`, `ryoku`, `ryoku-blobs`, `ryoku-desktop`,
-  `ryoku-keyring`, plus the `gpk` package manager).
-- The live ISO ([/docs/iso-build-recipe](/docs/iso-build-recipe)) signed
-  with the same release key.
+- **Package repositories** at `repo.ryoku.dev`: the pacman `[ryoku]` repository
+  for Arch and CachyOS, an XBPS repository for Void, and an RPM repository for
+  each supported Fedora release.
+- **Live ISOs** for Arch, CachyOS and Void
+  ([/docs/iso-build-recipe](/docs/iso-build-recipe)).
+- **The script installer**, a prebuilt binary committed in
+  `ryoku-shell-installer/` with its checksum.
 
-Both are produced from the monorepo by scripts under `release/` and
-`installation/iso/`, and published by workflows under `.github/workflows/`.
-This page describes only what those scripts and workflow files actually do.
+Everything is built from the monorepo by scripts under `release/`,
+`installation/iso/` and `void/iso/`, and published by the workflows under
+`.github/workflows/`. The in-repo
+[`docs/development.md`](https://github.com/Ryoku-dev/ryoku/blob/main/docs/development.md)
+("Branches and pushing") is the authoritative sequence.
 
 ## Versioning
 
-`VERSION` at the repo root holds the tracked semver (currently
-`0.1.0-beta.13`). The release helpers under `bin/` derive everything from it:
+`VERSION` at the repo root holds the tracked version, and `CODENAME` names the
+current release line (its story lives in `release/names.md`). The release
+helpers under `bin/` derive every other form from them, including the
+per-build package version, so every published build is strictly newer than the
+last. After each push to `unstable-dev`, the **Unstable Version Bump** workflow
+advances the unstable build number with a bot commit.
 
-- `bin/ryoku-release-version --channel main` prints the stable display
-  version.
-- `bin/ryoku-release-version --channel unstable-dev --build-number <run> --sha <sha>`
-  prints the rolling preview version (e.g.
-  `vX.Y.Z-...dev.<run>+g<short-sha>`).
-- `bin/ryoku-release-version --pkgver` prints the per-build pacman version
-  used in the monorepo PKGBUILDs (semver plus commit count and short sha),
-  so every published build is a strictly newer, commit-identifiable pacman
-  version and `pacman -Syu` actually sees an upgrade after each push.
-- `bin/ryoku-release-bump <patch|minor|major> <alpha|beta|stable>` prints
-  the next tracked release version.
+## Channels
 
-`.github/workflows/release-channel-versions.yml` validates these on PRs and
-pushes against `main` and `unstable-dev`. It compiles all four forms above,
-sanity-checks their shape with regexes, and on an `unstable-dev` push moves
-the `unstable-dev-latest` tag onto the pushed commit. That tag is a marker
-for the newest rolling build, not a stable release tag.
-
-## Cutting a stable release
-
-`.github/workflows/stable-release.yml` is the stable release entry point.
-Run it from `main` with three inputs:
-
-- `bump_type`: `patch`, `minor`, or `major`.
-- `release_stage`: `alpha`, `beta`, or `stable`.
-- `dispatch_iso`: whether to dispatch the ISO build after tagging.
-
-The workflow:
-
-1. Computes the new version with `bin/ryoku-release-bump` and refuses to
-   continue if the resulting tag already exists on `origin`.
-2. Writes the new value into `VERSION`, commits as
-   `github-actions[bot]` with subject `release: v<version>`, and pushes
-   `HEAD` + the annotated tag `v<version>` to `origin`.
-3. Dispatches `publish-repo.yml` against the new tag explicitly (a tag pushed
-   by `GITHUB_TOKEN` does not fire the tag trigger, so the dispatch is
-   required to republish the signed `[ryoku]` repo).
-4. If `dispatch_iso` is true, dispatches `build-iso.yml` against the tag
-   with the chosen `release_stage`.
-
-Concurrency is gated on the `stable-release` group so two cuts cannot race.
-
-## Building the `[ryoku]` pacman repo
-
-`release/repo/build-repo.sh` is the local + CI builder. It expects the
-release signing key already imported into the active `GNUPGHOME`. The script:
-
-1. Refuses to run as root (`makepkg` refuses too).
-2. Sanity-checks for `makepkg`, `repo-add`, and `gpg`, and that the key
-   `EB6D3C0F55A7B3CABA6B2838847B274F025DD6E3` is available.
-3. Wipes `out/<arch>/` so the database is rebuilt from exactly this run's
-   package set (no `repo-add --new`).
-4. Exports `PKGDEST=out/<arch>` and `PKGEXT=.pkg.tar.zst`, then exports
-   `RYOKU_PKGVER` from `bin/ryoku-release-version --pkgver`. The monorepo
-   PKGBUILDs (`ryoku-shell`, `ryoku-hub`, `ryoku`, `ryoku-blobs`,
-   `ryoku-desktop`) read this so every build is uniquely versioned;
-   `ryoku-keyring` and `gpk` keep their own pkgver (key-rotation date and
-   upstream release).
-5. Runs each `release/packages/*/PKGBUILD` with
-   `makepkg --force --clean --nodeps --noconfirm --sign --key $KEY_ID`.
-   `--nodeps` is intentional: runtime depends and AUR depends are not
-   resolvable here and not needed to compile; only the host build toolchain
-   matters (`base-devel`, `go`, `cmake`, `ninja`, `qt6-shadertools`,
-   `qt6-declarative`).
-6. Confirms every produced package has a `.sig` beside it.
-7. Runs `repo-add -s -k $KEY_ID out/<arch>/ryoku.db.tar.gz <pkg>...` to
-   build the signed database from the actual package set.
-8. Materializes the bare names `ryoku.db`, `ryoku.db.sig`, `ryoku.files`,
-   `ryoku.files.sig` as real files (not symlinks), because object storage
-   has no symlinks and `pacman` fetches the bare names.
-
-Env overrides: `RYOKU_REPO_OUT`, `RYOKU_REPO_KEY`, `RYOKU_REPO_NAME`,
-`RYOKU_REPO_ARCH`, `RYOKU_PACKAGES_DIR`, `RYOKU_PKGVER`.
-
-The final layout is exactly what the mirror serves:
-
-```
-out/x86_64/
-├── ryoku-<pkg>-<version>-1-any.pkg.tar.zst
-├── ryoku-<pkg>-<version>-1-any.pkg.tar.zst.sig
-├── ...
-├── ryoku.db
-├── ryoku.db.sig
-├── ryoku.files
-└── ryoku.files.sig
-```
-
-### Publishing the repo
-
-`.github/workflows/publish-repo.yml` runs the same `build-repo.sh` and
-uploads the result. Triggers: `push` to `main`, `push` of a `v*` tag, and
-`workflow_dispatch` (including the dispatch issued by `stable-release.yml`).
-A push to `unstable-dev` never publishes; the repo only advances when `main`
-fast-forwards.
-
-The job runs inside `archlinux:latest` (makepkg, repo-add, and pacman only
-exist on Arch) and installs the build toolchain:
-`base-devel git go cmake ninja qt6-shadertools qt6-declarative gnupg rclone`.
-
-Secrets required (workflow fails early when any are missing):
-
-| Secret | Purpose |
-| --- | --- |
-| `R2_ACCESS_KEY_ID` | Object-storage write key for the bucket backing `repo.ryoku.dev`. |
-| `R2_SECRET_ACCESS_KEY` | Matching secret. |
-| `R2_ENDPOINT` | S3-compatible endpoint for that bucket. |
-| `R2_BUCKET` | Bucket (or `bucket/prefix`) backing the repo URL. |
-| `GPG_PRIVATE_KEY` | Armored private signing key. |
-
-Build flow:
-
-1. A throwaway `builder` user is created and given ownership of the
-   checkout (`makepkg` refuses to run as root).
-2. The armored private key is written to a `0600` file under `$RUNNER_TEMP`,
-   chowned to `builder`, then `gpg --batch --import`ed into a fresh
-   ephemeral `GNUPGHOME` configured with `allow-loopback-pinentry` (the
-   release key is passphraseless; loopback keeps a headless runner from
-   blocking on a pinentry).
-3. `release/repo/build-repo.sh` runs as `builder`.
-4. The key file is removed.
-
-Publish flow: rclone is configured with a Cloudflare provider entry
-(`type = s3`, `provider = Cloudflare`, `no_check_bucket = true` so the
-scoped Object Read+Write token does not 403 on `HeadBucket`/`CreateBucket`),
-then:
-
-```bash
-rclone sync release/repo/out/x86_64 Ryoku:$R2_BUCKET/x86_64/ -P
-```
-
-`sync` (not `copy`) is deliberate: superseded packages and rotated-out
-signatures are pruned, so the bucket only ever holds the current set.
-
-## Building and publishing the ISO
-
-`.github/workflows/build-iso.yml` builds the live ISO with
-`installation/iso/build.sh` ([/docs/iso-build-recipe](/docs/iso-build-recipe))
-and publishes it.
-
-Triggers: `workflow_dispatch` (with a `release_stage` input of `alpha`,
-`beta`, or `stable`, defaulting to `alpha`) and a `v*` tag push. There is no
-branch-push trigger, so commits to `unstable-dev` never publish anything
-user-facing.
-
-The build runs on `ubuntu-latest` with `timeout-minutes: 120` and walks
-through these steps:
-
-1. **Checkout** with `fetch-depth: 0` and `persist-credentials: false`.
-   `build.sh` stages the payload with `git archive HEAD`, so full history is
-   cheap to keep around.
-2. **Prepare release metadata.** Computes
-   `tracking_id="r${GITHUB_RUN_NUMBER}-${short_sha}"` and exports
-   `RYOKU_ISO_*` env vars (commit, run URL, channel = the input
-   `release_stage`, `RYOKU_ISO_INSTALLER_REF=main`).
-3. **Verify required secrets are present** (`R2_ACCESS_KEY_ID`,
-   `R2_SECRET_ACCESS_KEY`, `R2_ENDPOINT`, `GPG_PRIVATE_KEY`). Fails fast
-   with the missing list.
-4. **Free disk space on the runner.** Strips preinstalled toolchains
-   (`/opt/hostedtoolcache`, `/usr/share/dotnet`, `/opt/ghc`,
-   `/usr/local/lib/android`, `/usr/local/share/boost`) and prunes docker.
-5. **Build ISO** inside a `--privileged archlinux:latest` container,
-   bind-mounting the repo at `/repo` and `$RUNNER_TEMP/ryoku-iso-build` at
-   `/work`. The container refreshes `archlinux-keyring`, installs the build
-   toolchain (`archiso git go base-devel cmake ninja qt6-base qt6-declarative
-   qt6-shadertools`), and runs `./build.sh` with
-   `RYOKU_ISO_OUT=/repo/installation/iso/out`,
-   `RYOKU_ISO_WORK=/work/work`, `RYOKU_ISO_STAGE=/work/staging`, and a
-   reproducible `SOURCE_DATE_EPOCH`. After the build the `out/` dir is
-   chowned back to the runner user. The `--privileged` flag is required so
-   `pacstrap` can bind-mount `/proc`, `/sys`, and `/dev` into the airootfs.
-6. **Capture ISO path** and rename the artifact to the tracked public name
-   `ryoku-<YYYY.MM.DD>-r<run>-<sha>-x86_64-<installer_ref>.iso`.
-7. **Mount the ISO live root for Trivy.** Loop-mount the ISO read-only,
-   find the squashfs (`*.sfs`), loop-mount it, and `rsync` the rootfs into
-   `$RUNNER_TEMP/ryoku-iso-rootfs` so Trivy can read it as a regular tree.
-8. **Trivy SARIF report** with `scan-type: rootfs`, scanners
-   `vuln,secret,misconfig`, severities `HIGH,CRITICAL`, `ignore-unfixed: true`.
-   `skip-dirs` excludes runtime mounts, the pacman package cache, and the
-   baked payload's bulky brand and wallpaper assets at
-   `usr/share/ryoku/ryoku/assets`. The SARIF is uploaded to the Security
-   tab via `github/codeql-action/upload-sarif@v4`.
-9. **Block on critical CVEs/misconfigurations.** A second Trivy step with
-   `severity: CRITICAL`, `exit-code: 1` fails the workflow before any
-   signing or upload if a critical finding is present.
-10. **Sign the ISO with GPG.** Imports `GPG_PRIVATE_KEY` into an ephemeral
-    `GNUPGHOME` under `mktemp -d`, signs with
-    `--batch --pinentry-mode loopback --passphrase-fd 0` if `GPG_PASSPHRASE`
-    is set or plain `--batch --detach-sign` otherwise, then verifies with
-    `gpg --verify`. Exports the public key as
-    `ryoku-release-key.pub.asc` next to the ISO; this mirrors the
-    repo-canonical copy at `keys/ryoku-release-key.pub.asc`.
-11. **Generate release manifests.** `bin/ryoku-iso-manifest <iso>` writes
-    `<iso>.sha256`, `<iso>.json`, `<iso>.js`, `latest.json`, and
-    `latest.js`.
-12. **Install rclone** via the official installer script.
-13. **Upload to Cloudflare R2.** rclone is configured with the same
-    Cloudflare provider entry as the repo workflow (`no_check_bucket =
-    true`). The ISO, signature, sha256, per-ISO manifests, `latest.*`
-    pointers, and the public key are copied to `Ryoku:$dest/` where
-    `$dest=${R2_BUCKET:-ryoku}`. The `[ryoku]` pacman repo owns per-arch
-    prefixes in the same bucket; the ISO release lives at the root.
-14. **Upload to the workflow run** as well via `actions/upload-artifact@v4`
-    with `retention-days: 14`, as a fallback to the R2 publish.
-15. **Notify Discord** if `DISCORD_WEBHOOK_URL` is set. Sends an embed with
-    title, tracking ID, channel, ref, image name, and the brand mark from
-    `ryoku/assets/brand/logo-mark.png`. Never fails the build (`if: always()`,
-    `continue-on-error: true`).
-
-### ISO build secrets
-
-The required set above (`R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`,
-`R2_ENDPOINT`, `GPG_PRIVATE_KEY`) plus the optional ones:
-
-| Secret | Optional | Purpose |
+| Channel | Fed by | Path under `repo.ryoku.dev/stable/` |
 | --- | --- | --- |
-| `R2_BUCKET` | yes | Override the default upload prefix (`ryoku`). |
-| `GPG_PASSPHRASE` | yes | Passphrase for the signing key; omit when the key has none. |
-| `DISCORD_WEBHOOK_URL` | yes | Build-complete notification target. |
+| **testing** | every push to `unstable-dev` that passes its checks | `channels/testing/...` |
+| **stable** | a release tag | the edition's root (`x86_64/`, `void/`, `fedora/<N>/`) |
 
-`R2_ENDPOINT` MUST be the account-scoped S3 endpoint
-(`https://<account>.r2.cloudflarestorage.com`), not the bucket URL.
+A release tag builds the set once into `releases/<tag>/`, a frozen copy that is
+never overwritten, and only then copies it over the stable pointer. That frozen
+history is what `ryoku rollback --to` and `ryoku track <version>` move between.
+The **Release Ledger** workflow rebuilds the release indexes the Hub and the
+website read. A scheduled retention worker (`release/r2-retention/`) keeps the
+ten newest package snapshots per edition and channel, and the ten newest ISOs
+per variant.
+
+## From a commit to testers
+
+1. A commit lands on `unstable-dev`. The required checks run: Go unit tests,
+   the installer backend tests, the delivery check and QML lint, among others.
+2. The **Testing gate** waits for all of them and records the commit in
+   `channels/testing/checked.json`. Boxes on `ryoku track unstable` build that
+   commit from source on their next `ryoku update`.
+3. The publishers (`publish-repo.yml`, `publish-repo-void.yml`,
+   `publish-repo-fedora.yml`) run the same gate, then build, sign and upload the
+   testing repositories. A red check never reaches a channel.
+
+## Cutting a release
+
+1. `main` advances only by a fast-forward from `unstable-dev`, pushed with
+   `RYOKU_RELEASE_PUSH=1 git push origin unstable-dev:main`. The `pre-push` hook
+   refuses any other push to `main`.
+2. The **Stable Release** workflow runs on `main`. With `bump_type: none` it tags
+   the version `main` already carries; `patch`, `minor` and `major` bump first.
+   It commits and tags the release, then dispatches the repository publish and
+   the release notes.
+3. The **Release Notes** workflow collects every `Note: New|Fixed|Removed:`
+   trailer between the previous tag and this one into the GitHub release. Never
+   squash-merge into a release branch: squashing drops the notes.
+4. The ISOs are built by dispatching `build-iso.yml`, `build-iso-cachyos.yml`
+   and `build-iso-void.yml` with the release stage. Each build signs the ISO,
+   writes its checksum and manifest, and uploads them beside the public key.
+
+## Building the pacman repository
+
+`release/repo/build-repo.sh` is the local and CI builder. It runs every
+`release/packages/*/PKGBUILD` with `makepkg --sign`, confirms each package has
+a signature beside it, builds the signed database with `repo-add -s`, and
+writes the bare `ryoku.db` and `ryoku.files` names as real files, because
+object storage has no symlinks. `--nodeps` is deliberate: only the host build
+toolchain matters at build time. The Void and Fedora publishers build the same
+packages from their templates and specs.
 
 ## The signing key
 
-`release/packages/ryoku-keyring/PKGBUILD` packages the public key material
-(`ryoku.gpg`, `ryoku-trusted`, `ryoku-revoked`) into
-`/usr/share/pacman/keyrings/`. The canonical public key for users to verify
-against lives in the repo at `keys/ryoku-release-key.pub.asc`. The release
-identity is `Ryoku Releases <releases@ryoku.dev>`, and the key fingerprint
-`build-repo.sh` signs with is `EB6D3C0F55A7B3CABA6B2838847B274F025DD6E3`.
+The release identity is `Ryoku Releases <releases@ryoku.dev>` with fingerprint
+`EB6D3C0F55A7B3CABA6B2838847B274F025DD6E3`. The canonical public key lives in
+the repo at `keys/ryoku-release-key.pub.asc`, and the `ryoku-keyring` package
+carries it into pacman's keyring.
 
-Rotating the key: regenerate `ryoku.gpg`, `ryoku-trusted`, and
-`ryoku-revoked`, bump the `pkgver` date in `ryoku-keyring/PKGBUILD`, replace
-`keys/ryoku-release-key.pub.asc`, and update `RYOKU_REPO_KEY` (or the
-default in `build-repo.sh`) to the new fingerprint.
+To rotate the key: regenerate the keyring files, bump the `pkgver` date in
+`ryoku-keyring`, replace `keys/ryoku-release-key.pub.asc`, and update the
+fingerprint the builders sign with.
 
 ## Verifying a published ISO
 
-The public key ships alongside each ISO in the same R2 location and is
-mirrored in the repo:
-
 ```bash
-iso=ryoku-<YYYY.MM.DD>-r<run>-<sha>-x86_64-<channel>.iso
-
 gpg --import keys/ryoku-release-key.pub.asc
-gpg --with-colons --import-options show-only --import keys/ryoku-release-key.pub.asc \
-  | awk -F: '/^fpr/ { print $10; exit }'
+gpg --fingerprint releases@ryoku.dev
 
-gpg --verify $iso.sig $iso
-sha256sum -c $iso.sha256
+gpg --verify ryoku-<date>-x86_64.iso.sig ryoku-<date>-x86_64.iso
+sha256sum -c ryoku-<date>-x86_64.iso.sha256
 ```
 
 The fingerprint MUST match `EB6D3C0F55A7B3CABA6B2838847B274F025DD6E3` before

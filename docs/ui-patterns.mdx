@@ -1,153 +1,90 @@
 ---
 title: UI Patterns
-description: "How the Ryoku shell is composed: one component per file, shared tokens, and the frame's motion language."
+description: "How the Ryoku shell is composed: one shell process, one component per file, shared tokens, and the frame's motion language."
 ---
 
 The Ryoku shell is **Quickshell (QML) under `ryoku/shell/quickshell/`, driven
 by the `ryoku-shell` Go daemon under `ryoku/shell/ipc/`**. This page is the
-contract for changing or adding UI: where things live, which tokens to reach
-for, and the motion language popouts have to honor.
-
-Hands-on background: read `docs/structure.md`, `docs/ui-ux.md`, `docs/frame.md`,
-and `docs/conventions.md` in the repository before a non-trivial change.
+short version of the contract for changing or adding UI. The full rules live
+in the repository:
+[`docs/ui-ux.md`](https://github.com/Ryoku-dev/ryoku/blob/main/docs/ui-ux.md),
+[`docs/frame.md`](https://github.com/Ryoku-dev/ryoku/blob/main/docs/frame.md),
+[`docs/structure.md`](https://github.com/Ryoku-dev/ryoku/blob/main/docs/structure.md)
+and
+[`docs/conventions.md`](https://github.com/Ryoku-dev/ryoku/blob/main/docs/conventions.md).
 
 ## View and logic stay apart
 
-The shell is split deliberately:
+- **QML renders and animates.** Each surface is its own directory and each
+  component is a single `.qml` file.
+- **`ryoku-shell` decides.** The Go daemon supervises the shell, owns
+  wallpaper, clipboard and lock state, registers as the GNOME keyring prompter,
+  and serves the control socket.
+- **Nothing names a compositor.** The shell reads the neutral window-manager
+  singleton and asks capabilities; only `ryoku/wm/` knows Hyprland or niri.
 
-- **QML renders and animates.** Each surface lives in its own directory under
-  `ryoku/shell/quickshell/` and each component is a single `.qml` file.
-- **`ryoku-shell` decides.** The Go daemon supervises the Quickshell components,
-  owns wallpaper, clipboard, and lock state, registers as the GNOME keyring
-  system prompter (`ipc/prompter.go`, `ipc/secretexchange.go`), and serves the
-  control socket.
+QML never holds policy. When the UI needs a system change (packages, services,
+displays, power, network, updates, wallpaper, hardware) it goes through
+`ryoku-shell` or a named `ryoku-*` helper behind a narrow service.
 
-QML never holds policy. When the UI needs a system mutation (package, service,
-display, compositor, power, network, update, rollback, cursor, font, wallpaper,
-hardware), it talks to `ryoku-shell` or calls a named `ryoku-*` helper through
-a narrow service. No ad hoc `hyprctl` calls from a component; for compositor
-state, go through a service that wraps the IPC.
+## One shell, one component per file
 
-## One component per file
+Every surface runs in one `qs -c shell` process, drawn per monitor from one
+scene (`shell/shell.qml`):
 
-The QML tree mirrors the surfaces from `docs/ui-ux.md`:
-
-| Directory | Surface |
+| Directory | What lives there |
 | --- | --- |
-| `ryoku/shell/quickshell/pill/` | The morphing top island, the screen frame, edge popouts, and centre surfaces (deck, launcher, voice, keyring). |
-| `ryoku/shell/quickshell/pill/popouts/` | Edge popouts (`Mixer.qml`, `Power.qml`) and the reusable `Popout.qml` machinery. |
-| `ryoku/shell/quickshell/sidebar/` | The slide-in panel: audio, network, bluetooth, display, notifications, media. |
-| `ryoku/shell/quickshell/ryoshot/` | Screenshot capture and annotation. |
-| `ryoku/shell/quickshell/widgets/` | Desktop wallpaper widgets (clock faces, weather skies, the widget grid). |
-| `ryoku/shell/quickshell/switcher/` | `Alt+Tab` MRU window switcher. |
-| `ryoku/shell/quickshell/visualizer/` | Desktop audio visualiser (`Mod+M`). |
+| `shell/modules/` | One directory per surface: `bar` (the frame bars and the bar styles), `sidebar`, `dock`, `launcher`, `overview`, `wallpaper`, `visualizer`, `osd`, `notifications`, `capture`, `clipboard`, `desktop` and more. |
+| `shell/services/` | The shared singletons every surface reads, including `Scheme` (colors) and `Motion`. |
+| `shell/components/`, `shell/utils/` | Shared UI primitives and shared JS. |
+| `ryoshot/`, `welcome/`, `stage/`, `keys/` | Capture and annotation, the first-run tour, the Stage Editor, and Kit. |
+| `plugins/` | The third-party plugin runtime and the `Ryoku.PluginKit` module. |
 
-Compose with components; do not merge unrelated UI into one file. A new
-concern is a new `.qml` next to the surface it belongs to, not a branch inside
-an existing component.
+Compose with components; do not merge unrelated UI into one file. A new concern
+is a new `.qml` next to the surface it belongs to.
 
 ## Shared tokens
 
-Each surface ships its own singleton pack under `<surface>/Singletons/` and
-exposes them through a `qmldir`. They are the single source of truth for
-colors, motion, and shell-wide configuration; literal one-off values are
-opting out of theming.
+`Ryoku.Ui` (`ryoku/ui/`) is the module the shell, the Hub and the apps import
+for one look. Its `Tokens` singleton carries the palette roles, type, geometry
+and the app motion set; the shell resolves the same palette through
+`shell/services/Scheme.qml`, with a thin local `Theme.qml` per surface that only
+names the roles it uses.
 
-In the pill (`ryoku/shell/quickshell/pill/Singletons/qmldir`):
+- **Never write a hex, a font name, a radius or a duration in a component.**
+  Read the token.
+- **Two colors are fixed.** `Theme.brand` (`#e2342a`, the vermillion of the 力
+  seal) and `Tokens.alert` (the same red). Everything else derives from the
+  wallpaper.
+- **The accent lives on the frame, not the content.** Depth is a hairline, not
+  a shadow; a shadow appears only where something genuinely floats.
 
-| Singleton | Purpose |
-| --- | --- |
-| `Theme` | Palette and type tokens. Brand orange (`#F25623`) is fixed; surface colors (`cardTop`, `cardBot`, `border`, `tileBg`, `cream`, etc.) read like the rest of the chrome and follow the active theme. Fonts: Inter, Noto Sans CJK JP, JetBrainsMono Nerd. |
-| `Motion` | Durations and curves. `fast: 140`, `standard: 300`, `morph: 420`, `shapeshift: 820`, `glide: 260`. The project morph curve is `cubic-bezier(0.16, 1, 0.3, 1)`, exposed as `morphCurve` and used with `easeMorph` (`Easing.BezierSpline`). |
-| `Config` | Live shell appearance, the live value Ryoku Settings edits and the shell falls back to. Persisted as JSON at `~/.config/ryoku/shell.json` and watched, so a save in Ryoku Settings retunes the running shell with no reload. |
-| `Apps`, `Notifs`, `Cliphist`, `Walls`, `Devices`, `Battery`, `Vpn`, `VoiceCall`, `Recorder`, `Weather`, `Stash`, `Updates`, `Keyring`, `Events`, `Flags`, `SysInfo`, `AudioBars`, `VoiceBars` | The data the pill renders, sourced through the daemon or the system. UI binds; nothing in the view does its own polling. |
+## Motion
 
-Practical rules:
+Motion is short and purposeful: it explains a state change.
 
-- Never hardcode a color, font, duration, or radius that should follow the
-  theme. Read from the surface's singletons. Brand orange and the 力 mark are
-  fixed (`Theme.brand` / `#F25623`); everything else is themed.
-- Motion lives in `Motion`. Pick `morph` for the project's signature morph,
-  `standard` for everyday transitions, `fast` for snappy feedback. Match the
-  curve already in `pill` rather than inventing a new one; consistency is the
-  aesthetic.
-- Geometry that **drives** a motion (a morph progress, a clip width) is fine
-  to compute; only the timing and curve must come from the tokens.
-- When a value needs to become user-configurable, add it to `Config`, expose
-  it through Ryoku Settings, and make the view read the shared value.
-
-## Motion is the frame swelling open
-
-The pill, the edge popouts, the screen border, and the centre surfaces share
-one signed-distance field (`Ryoku.Blobs`, the compiled QML plugin under
-`ryoku/shell/plugin/`). Every popup that emerges from the frame must animate
-as the frame expanding, never as a separate panel flying in. The hard rules,
-from `docs/frame.md`:
-
-- **Pin the frame-side edge.** Grow only the perpendicular dimension; clip the
-  content and reveal it edge-first as the body widens.
-- **Fuse with a neck into the border.** A `BlobRect` body in the same
-  `BlobGroup` extends a neck clamped to its own width, so it retracts in
-  lockstep instead of snapping off as a flickering sliver.
-- **Open with the morph curve, close with a spring.** Open uses the project's
-  `cubic-bezier(0.16, 1, 0.3, 1)` with no end-overshoot. Close uses a
-  lightly-damped `SpringAnimation`: it melts fully flush into the border, then
-  springs back a touch, so the resting state stays flush.
-
-Forbidden in any popup that emerges from the frame:
-
-- Sliding a full panel in from off-screen.
-- Fading with `opacity`.
-- Center-zoom of the whole panel.
-- A standalone `BlobRect` whose width is held constant on close (it leaves a
-  band wider than the island in the last frames; morph width down to the
-  neck width).
-
-## Adding a popout
-
-`Popout.qml` under `pill/popouts/` is the reusable machinery: the blob body,
-a content slot, the pixel-perfect edge hover trigger, and the reveal clip.
-To add a new one (the same shape `Mixer.qml` and `Power.qml` use):
-
-1. Add `ryoku/shell/quickshell/pill/popouts/Foo.qml`: a transparent `Item`
-   (`anchors.fill: parent`, an `s` scale property) holding the content, reading
-   `Theme` and `Motion` for tokens and styling. The blob behind it is the
-   surface, so do not paint a background.
-2. In `pill/shell.qml`, inside the overlay's blob field, add
-   `Popout { group: blobGroup; frameThickness: 16; radius: 16; smoothing: 30; edge: "left"|"right"; Foo {} }`.
-3. Union the popout's `triggerX/Y/W/H` and `bodyX/Y/W/H` into the overlay
-   input mask so its edge and open body catch input while the rest stays
-   click-through.
-4. Trigger by hover (built in). For a keybind, route the `ryoku-shell`
-   command to `togglePopout` rather than a centre surface.
-
-## Adding a centre surface
-
-Centre surfaces (the toolkit deck, the launcher, the keyring prompt, the voice
-panel) live in `pill/` itself. They keep the same motion contract as edge
-popouts (anchored to the pill, growing the blob field, no off-screen slide),
-and they read state from the daemon over the shell socket. The view never
-asks Hyprland or PipeWire directly; the daemon does, and the QML binds.
+- **Apps and the Hub** use the `Tokens` set: `snap` (90ms), `move` (170ms),
+  `swap` (210ms) and `flap` (110ms).
+- **The shell** uses `Motion`'s named tokens (`barReveal`, `menuSlide`,
+  `sidebarEnter`, `push`, `morph`, `spatial` and the rest). Every shell token is
+  already scaled by the user's tempo and collapses to zero under reduce-motion,
+  so read the token and never wrap it again.
+- **The frame's give is physical.** `BlobRect` (in the `Ryoku.Blobs` plugin)
+  solves an underdamped spring from its own velocity, which is the liquid feel
+  when a popout grows out of the frame. A popup that emerges from the frame
+  grows as the frame expanding, never as a separate panel sliding or fading in.
 
 ## Layout discipline
 
-Operational surfaces stay dense and predictable:
-
-- Use stable `width`, `height`, or `implicit*` sizing for repeated controls.
-- Use shared spacing tokens between rows and sections.
-- Cards for repeated items, menus, modals, and framed tools; avoid nested
-  cards.
+- Use stable `width`, `height` or `implicit*` sizing for repeated controls.
+- Use the shared spacing tokens between rows and sections.
+- Cards for repeated items, menus, modals and framed tools; avoid nested cards.
 - Keep text inside controls short enough to fit at narrow widths.
 - Do not use viewport-scaled font sizes.
 
 ## The dev loop
 
-`ryoku/shell/dev-run.sh` launches the shell from the checkout via `qs -p`
-with hot reload, so QML edits show as you save. Tune timing against the
-running surface; do not eyeball it. `dev-stop.sh` releases the dev shell,
-`dev-binds.sh` reloads Hyprland binds for a faster bind iteration.
-
-For non-trivial changes touching the daemon or a shared service, trace the
-flow from `Config` or IPC into every consumer rather than patching one visible
-page. The shared tokens and the daemon are the contracts; everything else is
-view.
+`ryoku/shell/dev-run.sh` launches the shell from the checkout with hot reload,
+so QML edits show as you save. `dev-stop.sh` releases the dev shell. For changes
+touching the daemon or a shared service, trace the flow from the config or IPC
+into every consumer rather than patching one visible page.

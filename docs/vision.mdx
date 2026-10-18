@@ -17,73 +17,53 @@ Keep this line. It is the heart of the project.
 
 ## What it is
 
-Ryoku Arch is a premium, opinionated Arch Linux workstation environment for
-powerful desktops and laptops. The desktop is the [Hyprland](https://hypr.land/)
-compositor with a [Quickshell](https://quickshell.outfoxxed.me)-based UI driven
-by a Go daemon (`ryoku-shell`). It ships as signed pacman packages from the
-`[ryoku]` repository, with a guided installer that adds the repo, installs
-`ryoku-desktop`, and hands you a riced desktop on first boot.
+Ryoku is a hand-built Linux desktop for powerful desktops and laptops. One
+shell, a [Quickshell](https://quickshell.outfoxxed.me) UI driven by a Go daemon
+(`ryoku-shell`), runs on [Hyprland](https://hypr.land/) or
+[niri](https://github.com/YaLTeR/niri), on Arch Linux, CachyOS, Void Linux and
+Fedora. Every edition installs the same desktop as signed native packages, and
+one repository holds the desktop, the installers and the system definition.
 
-The base is deliberately lean, and it scales up with the plugins, extras, and
-apps you actually use. Theming follows the wallpaper through `wallust`, brand
-elements stay constant, and one control plane (the `ryoku` CLI and Ryoku
-Settings, the Hub) owns updates, snapshots, appearance, displays, and the
-shell.
-
-Ryoku is an environment on top of Arch, not its own distribution. Stick to
-"Ryoku Arch", "the Ryoku environment", or "the Ryoku workstation". See
-[Branding](/docs/branding) for the verbal and visual rules.
+The base is deliberately lean and scales up with the apps, plugins and bundles
+you actually use. Colors follow the wallpaper, the brand stays constant, and
+one control plane (the `ryoku` command and Ryoku Settings) owns updates,
+snapshots, appearance, displays and the shell.
 
 ## Who it is for
 
-- Desktop and laptop users who want Arch to feel finished on strong hardware.
-- Developers who need terminals, browsers, files, notes, containers, and media
+- Desktop and laptop users who want a tiling desktop that feels finished on
+  strong hardware.
+- Developers who need terminals, browsers, files, notes, containers and media
   tools ready on day one, without building the whole desktop from scratch.
 - Power users who like a riced desktop but want the rice maintained as a
   product, not a private dotfiles pile.
-- Users who want advanced workflows surfaced as plugins instead of tray icons
-  and one-off scripts.
-
-## Intended use
-
-The main use case is a personal workstation: development, browsing, media,
-notes, terminals, containers, hardware controls, and workflow surfaces in one
-coherent system.
-
-Security-aware features still matter, but they live as plugin lanes among
-others, not as the entire identity. For professional, security-sensitive work,
-keep a dedicated engagement environment with client separation, audited
-snapshots, and explicit operating boundaries. Ryoku is a workstation first.
+- Users who want advanced workflows surfaced as plugins and bundles instead of
+  tray icons and one-off scripts.
 
 ## What distinguishes it
 
-- **A pre-riced Hyprland desktop.** The default look is a product choice, not a
-  placeholder. Hyprland is authored in Lua, one concern per module, so the
-  config is readable instead of a tangle.
+- **A finished desktop on more than one window manager.** The default look is a
+  product choice, not a placeholder, and it is the same on Hyprland and niri.
+  Each window manager's config is written in its own language (Lua for
+  Hyprland, KDL for niri), one concern per file.
 - **One shell stack.** A single Quickshell UI plus the `ryoku-shell` daemon
   decide together (the daemon owns state, the UI renders), instead of stitching
   a dozen widgets and tray apps.
-- **Signed packages and one update command.** `ryoku update` brings the system
-  current from the signed `[ryoku]` repo, re-lays the base config with
-  `ryoku materialize`, and reloads the shell. On a btrfs root with snapper
-  configured (the standard install), each run is wrapped in a snapper
-  pre/post snapshot pair, and rollback is also selectable from the Limine
-  boot menu.
-- **A strict Ryoku command and config surface.** The `ryoku` CLI is the system
-  front door; `~/.config/hypr` is where your config lives; Ryoku Settings
-  (`Mod+,`) is the one place to change appearance, displays, input, keybinds,
-  the lockscreen, animations, window and layer rules, autostart, the shell, and
-  the desktop widgets.
-- **A visual system.** Boot, login, lock, shell, terminal, and app defaults are
-  treated as one thing. The Greek Noir palette with `#F25623` 力 is the brand
-  anchor; wallpaper-driven themes ride on top.
+- **An installer that asks.** Browser, file manager, terminal tools, Ryoku's
+  own apps and Rashin are choices on every install path, and what you leave out
+  stays out.
+- **Signed packages and one update command.** `ryoku update` brings Ryoku's
+  packages current from its signed repository, re-lays the base config, runs
+  `ryoku doctor`, and wraps the run in snapshots where the edition supports
+  them.
+- **A visual system.** Boot, login, lock, shell, terminal and app defaults are
+  treated as one thing, anchored by the vermillion 力 seal.
 
 ## What it is not
 
 - A fixed image you cannot shape.
 - A bare window-manager starter kit with no defaults or direction.
-- A general-purpose distribution with a Ryoku wallpaper.
-- A specialist engagement-only stack.
+- A wallpaper and a theme on top of someone else's desktop.
 - A re-skin of an upstream shell. Upstream projects are important sources, but
   Ryoku's job is to turn the useful pieces into a Ryoku-owned, modular system.
   See [Omarchy heritage](/docs/omarchy-heritage) for what Ryoku adapts and what
@@ -91,22 +71,17 @@ snapshots, and explicit operating boundaries. Ryoku is a workstation first.
 
 ## Roadmap
 
-Near-term priorities:
-
-1. Keep the Hyprland workstation stable enough for daily use on real hardware.
-2. Shape the current Quickshell-based shell into a Ryoku-owned plugin shell,
-   with plugins as first-class extension points instead of bespoke scripts.
-   See [Plugins](/docs/plugins) for current status.
-3. Keep ISO builds signed and verifiable through the release pipeline.
-4. Move security-adjacent, developer, media, hardware, and capture workflows
-   into clean plugin lanes.
-5. Expand real-hardware install coverage before calling the ISO stable.
+The roadmap is public on the
+[Ryoku Roadmap](https://github.com/orgs/Ryoku-dev/projects/1) board, built from
+the feature requests in
+[GitHub Discussions](https://github.com/Ryoku-dev/ryoku/discussions). Ideas
+start there; the board shows what is planned, in progress and done.
 
 ## See also
 
-- [Install Ryoku](/docs/install) for the current install path.
+- [Install Ryoku](/docs/install) for the install paths.
 - [Desktop tour](/docs/tour) for what the shell ships with.
-- [Updates](/docs/updates) for how `ryoku update`, snapshots, and rollback work.
+- [Updates](/docs/updates) for how `ryoku update`, snapshots and rollback work.
 - [Branding](/docs/branding) for the visual and verbal identity.
 - [Omarchy heritage](/docs/omarchy-heritage) for sources, attribution, and what
   no longer ships.

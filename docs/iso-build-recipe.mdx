@@ -1,16 +1,28 @@
 ---
 title: ISO Build Recipe
-description: "How the Ryoku live ISO is assembled from installation/iso/build.sh: prebuilt installer, baked repo payload, mkarchiso."
+description: "How the Ryoku live ISOs are assembled: the Arch and CachyOS archiso profile, the offline package closure, and the Void image."
 ---
 
 The Ryoku live ISO is a standard archiso image with one job: boot a machine
 and drop you straight into the Ryoku installer. The whole build is
 `installation/iso/build.sh`: stage the archiso profile, build the Go
-installer, bake the repo payload and the prebuilt binaries into `airootfs`,
-then hand the staged tree to `mkarchiso`.
+installer, bake the repo payload, the prebuilt binaries and an offline package
+repository into `airootfs`, then hand the staged tree to `mkarchiso`.
 
 This page describes the local recipe. The same script runs in CI
 ([/docs/release-pipeline](/docs/release-pipeline)) inside an Arch container.
+
+## Three images
+
+| Image | Built by | What differs |
+| --- | --- | --- |
+| Arch Linux | `installation/iso/build.sh` | The default, `RYOKU_VARIANT=plain`. |
+| CachyOS | `RYOKU_VARIANT=cachyos installation/iso/build.sh` | The same profile; the offline closure carries the CachyOS kernel, tuning and repositories, and the installer reads the variant marker. |
+| Void Linux | `void/iso/build.sh` | A void-mklive image built in a Void container, with the same TUI and Void's backend. |
+
+The Arch and CachyOS ISOs share every path except that one switch. Fedora has
+no ISO: it is reached by converting an existing Fedora install with the script
+installer.
 
 ## What the ISO ships
 
@@ -118,16 +130,29 @@ prints the exact follow-up command, which boils down to:
 sudo mkarchiso -v -w work -o out ./staging/profile
 ```
 
+### The offline package closure
+
+`installation/iso/offline-repo.sh` downloads every package a target can
+reach (the base and hardware sets, the developer set, the GPU drivers and the
+Ryoku desktop), resolves the whole dependency closure, and bakes it into an
+`[offline]` file repository at `/usr/share/ryoku/offline/repo`. The installed
+system pacstraps from it with no network. The download is cached under
+`offline-cache/`, which is gitignored.
+
 ### Build environment overrides
 
-`build.sh` honors three env vars for output and intermediate locations:
+| Variable | What it does |
+| --- | --- |
+| `RYOKU_VARIANT` | `plain` (default) or `cachyos`. |
+| `RYOKU_ISO_OUT` | ISO output dir (default `./out`). |
+| `RYOKU_ISO_WORK` | mkarchiso work dir (default `./work`). |
+| `RYOKU_ISO_STAGE` | Staging tree root (default `./staging`). |
+| `RYOKU_ISO_REPRO` | `1` pins packages to the commit-dated Arch archive. |
+| `RYOKU_ISO_WORKTREE` | `1` bakes the working tree, uncommitted files included, for a local test ISO. |
 
-- `RYOKU_ISO_OUT` ISO output dir (default `./out`).
-- `RYOKU_ISO_WORK` mkarchiso work dir (default `./work`).
-- `RYOKU_ISO_STAGE` staging tree root (default `./staging`).
-
-CI uses these to keep `mkarchiso`'s work tree on a real ext4 bind mount
-under `$RUNNER_TEMP` rather than the container's overlay layer.
+Every timestamp in the build is pinned to the commit's date, so the same
+commit builds to the same bytes. CI keeps `mkarchiso`'s work tree on a real
+ext4 bind mount under `$RUNNER_TEMP` rather than the container's overlay layer.
 
 ## Preflight checks `build.sh` enforces
 
