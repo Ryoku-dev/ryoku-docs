@@ -1,232 +1,99 @@
 ---
 title: Branding
-description: The visual and verbal identity of Ryoku Arch, the Greek Noir palette, and the rules for using the 力 mark.
+description: Ryoku's visual and verbal identity, the 力 seal and wordmark, the fixed colors, and the rules for using them.
 ---
-
-The visual and verbal identity of the Ryoku Arch project.
 
 ## Name
 
 **Ryoku** comes from the Japanese kanji **力** (read *chikara* or *ryoku*),
-meaning "power" or "strength". The project's tagline appears in both Japanese
-and English:
+meaning "power" or "strength". The tagline appears in both Japanese and
+English:
 
 > **力と美のために** : *For the sake of power and beauty.*
 
-Use "Ryoku" in prose. Use the "Ryoku Arch" full name on first mention in
-user-facing copy where context might be ambiguous (release pages, install
-instructions, the README header).
+Use "Ryoku" in prose. Name an edition by what it runs on: "Ryoku on Arch
+Linux", "Ryoku on CachyOS", "Ryoku on Void", "Ryoku on Fedora". The old "Ryoku
+Arch" name is retired now that Ryoku runs on four distributions. Never put
+another project's name inside Ryoku's product name (no "Ryoku Fedora"), and
+never imply that another project endorses Ryoku.
 
-**Do not call it a distribution.** Ryoku is an opinionated Arch Linux
-environment on top of Arch, not its own distribution. Stick to "Ryoku Arch",
-"the Ryoku environment", or "the Ryoku workstation".
+The expected tone is polished, direct and usable for daily machine work. No
+marketing fluff, no emoji.
 
-For documentation, keep this lens:
+## The marks
 
-- Ryoku is a premium workstation environment with a clear design and workflow
-  default.
-- Workload bundles (developer, media, hardware, security-adjacent) are one lane
-  among many, not the entire identity.
-- The expected tone is polished, direct, and usable for daily machine work. No
-  marketing fluff, no emoji.
+| Mark | What it is | Where it lives |
+| --- | --- | --- |
+| **The 力 seal** | The kanji drawn as a stencil cut in bone, with one cut in burnt orange. | `ryoku/assets/brand/logo-mark-v2.png` |
+| **The wordmark** | `RYOKU` in the same stencil letterforms, the K's leg in burnt orange. | `ryoku/assets/brand/wordmark-v2.png` |
+| **The Rashin seal** | A sibling seal for Rashin: the same tile carrying 十, the needle and compass card, with north in vermillion. | `ryoku/assets/brand/rashin-mark.svg`, `rashin-lockup.svg` |
 
-## Website
+The seal is the primary mark. The wordmark is for places that already have room
+and typographic context: a site header, a banner, these docs. When in doubt,
+use the seal.
 
-`https://ryoku.dev` is the public site. Until docs.ryoku.dev is fully wired up,
-the GitHub repo at
-[`ryoku-dev/ryoku-arch`](https://github.com/ryoku-dev/ryoku-arch) is the
-canonical pointer for source.
+The docs use the wordmark in the header, recolored to near-black ink for the
+light theme, and the seal on a near-black rounded square as the favicon.
 
-## Brand colors (Greek Noir palette)
+## Colors
 
-The palette is named **Greek Noir** in the codebase. It is the Ryoku-branded
-reference palette. Hex values:
+A few colors never follow the wallpaper:
 
-| Role | Hex | Notes |
-|---|---|---|
-| **Accent / brand orange** | `#F25623` | Primary brand color. Used for the kanji mark, the `RYOKU` wordmark, Limine branding, status badges, and the terminal accent. The Quickshell theme exposes it as `Theme.brand`. |
-| Bright orange | `#F56E0F` | Secondary accent, brighter variant of the brand. Used in `term_palette_bright` slot 5 and as the bright variant in some themes. |
-| Background dark | `#171717` | Default dark surface. SVG logo background, terminal background, Plymouth window background, Limine `term_background`. |
-| Foreground / subdued | `#aeab94` | Muted beige used for body text in dark contexts and the tagline. |
-| Foreground bright | `#CCD0CF` | Standard terminal text. |
-| Background bright | `#333333` | Lifted dark surface, subtle hover states. |
-| Muted gray accent | `#4D4D4D` | Yellow slot replacement, dividers. |
-| Muted green-gray | `#88A57D` | Blue slot replacement, callout / info. |
-| Cyan replacement | `#8A8A8A` | Standard cyan slot, neutralized. |
-| Light gray | `#bcbfbc` | White slot in normal palette. |
-| Faded foreground | `#757d75` | White slot in bright palette, subtle hint text. |
+| Token | Value | Use |
+| --- | --- | --- |
+| Vermillion (`Theme.brand`) | `#e2342a` | The color the 力 seal wears in the shell. |
+| Alert (`Tokens.alert`) | `#e2342a` | Badges and warnings, so an alert always reads as one. |
+| Kintsugi gold | `#d9a441` | Seams and highlights, used sparingly. |
 
-### Limine boot menu palette (literal config)
-
-Shipped in `system/boot/limine/limine.conf`:
-
-```
-term_background:      171717
-backdrop:             171717
-term_palette:         171717;aeab94;F25623;4D4D4D;88A57D;F56E0F;8A8A8A;bcbfbc
-term_palette_bright:  333333;aeab94;F25623;4D4D4D;88A57D;F56E0F;8A8A8A;757d75
-term_foreground:        CCD0CF
-term_foreground_bright: CCD0CF
-term_background_bright: 333333
-
-interface_branding:       Ryoku Bootloader
-interface_branding_color: F25623
-interface_help_color:     F25623
-```
-
-Limine 12+ expects `RRGGBB` hex directly for `interface_branding_color`, which
-is the form the file uses.
-
-### Plymouth window
-
-`system/boot/plymouth/ryoku/ryoku.script` sets the decrypt-prompt window to a
-flat dark surface:
-
-```
-Window.SetBackgroundTopColor(0.0902, 0.0902, 0.0902);    # ~ #171717
-Window.SetBackgroundBottomColor(0.0902, 0.0902, 0.0902); # ~ #171717
-```
-
-## Logos
-
-### Source files (canonical)
-
-All logo sources live under `ryoku/assets/brand/` so the repo root stays
-focused on project metadata and entrypoint docs:
-
-| File | Purpose | Format | Notes |
-|---|---|---|---|
-| `ryoku/assets/brand/logo.svg` | Square logo with rounded background | SVG | 512x512, `#171717` rounded-square background, `#F25623` kanji `力` centered. Use on light surfaces and in places that want the full mark with its own backdrop (favicon, app icon). |
-| `ryoku/assets/brand/logo-mark.svg` | Transparent-background kanji mark | SVG | 512x512 output with a padded viewBox, transparent background, `#F25623` kanji `力` centered. Use in the README header, on dark theme cards, anywhere that already provides its own background. |
-| `ryoku/assets/brand/icon.png` | Rasterized square logo | PNG (512x512) | Same composition as `logo.svg`, exported. Used where SVG is not supported. |
-| `ryoku/assets/brand/logo-mark.png` | Rasterized transparent mark | PNG (512x512) | Same composition as `logo-mark.svg`, exported. Used by the README header, the fastfetch kitty-direct logo, and notification surfaces. |
-| `ryoku/assets/brand/light.png` | Mintlify light-mode header | PNG (600x160) | Docs site light-theme header logo. |
-| `ryoku/assets/brand/dark.png` | Mintlify dark-mode header | PNG (600x160) | Docs site dark-theme header logo. |
-| `ryoku/assets/brand/logo.txt` | ASCII `RYOKU` wordmark | UTF-8 box-drawing | Hand-drawn box-drawing wordmark. Reuse verbatim; do not regenerate. |
-| `ryoku/assets/brand/icon.txt` | ASCII kanji block art | UTF-8 block characters | Hand-drawn `力` in `█` blocks, sized for terminal banners. |
-
-The kanji `力` is rendered at weight 900 in **Noto Sans CJK JP** at the size
-that fills the canvas with comfortable margin. The transparent mark keeps extra
-viewBox padding so font renderer differences do not cut off the glyph in
-compact surfaces such as the shell bar. Ryoku's base package set pulls
-`noto-fonts-cjk` so the SVG renders consistently on any Ryoku install.
-
-### Asset locations on the installed system
-
-`installation/backend/lib/deploy.sh` copies the brand tree into the user's
-home, so any Ryoku-aware app can read the assets by a stable path:
-
-| Path | Purpose |
-|---|---|
-| `~/.local/share/ryoku/assets/brand/logo-mark.png` | Brand mark for fastfetch, notifications, and any Ryoku-aware app. |
-| `~/.local/share/ryoku/assets/brand/logo.txt` | ASCII wordmark for terminal banners. |
-| `/usr/share/plymouth/themes/ryoku/logo.png` | Plymouth boot-splash branding. |
-
-### How to regenerate the SVG mark
-
-The square SVG is intentionally minimal so you can hand-edit it. Replace the
-`text` element to change the glyph; keep the `fill` and `font-family`
-consistent with the table above.
-
-```xml
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <rect width="512" height="512" rx="48" ry="48" fill="#171717"/>
-  <text x="256" y="360"
-        font-family="Noto Sans CJK JP, sans-serif"
-        font-weight="900"
-        font-size="360"
-        fill="#F25623"
-        text-anchor="middle"
-        dominant-baseline="middle">力</text>
-</svg>
-```
-
-To rasterize after editing the SVG, Inkscape is the project's reference tool
-because it renders Noto CJK correctly:
-
-```bash
-inkscape -w 512 -h 512 ryoku/assets/brand/logo.svg --export-filename=ryoku/assets/brand/icon.png
-inkscape -w 512 -h 512 ryoku/assets/brand/logo-mark.svg --export-filename=ryoku/assets/brand/logo-mark.png
-```
-
-Or with `rsvg-convert` (smaller dependency, no GUI):
-
-```bash
-rsvg-convert -w 512 -h 512 ryoku/assets/brand/logo.svg -o ryoku/assets/brand/icon.png
-rsvg-convert -w 512 -h 512 ryoku/assets/brand/logo-mark.svg -o ryoku/assets/brand/logo-mark.png
-```
-
-After regenerating, commit the source SVG and the matching PNG so README
-rendering on GitHub keeps working without server-side SVG quirks.
-
-### How to regenerate the ASCII wordmark
-
-`ryoku/assets/brand/logo.txt` was hand-built in box-drawing characters. If the
-wordmark needs to change (for example, version branding), build it from a
-figlet-style font that uses Unicode box-drawing, then hand-tune for kerning.
-Do **not** auto-generate it as ANSI escape sequences; the file is raw UTF-8 so
-any terminal can render it.
-
-```
-# Reference: the current characters used by ryoku/assets/brand/logo.txt
-# ╔ ╗ ╚ ╝ ║ ═ ╠ ╣ ╦ ╩ ╬ █
-```
-
-## Application areas (where the brand shows up)
-
-| Surface | Source of brand | What renders |
-|---|---|---|
-| GitHub README | `ryoku/assets/brand/logo-mark.png` | Kanji mark and status badges in brand orange. |
-| Limine boot menu | `system/boot/limine/limine.conf` | Orange branding text "Ryoku Bootloader", Greek Noir terminal palette. |
-| Plymouth decrypt and boot splash | `system/boot/plymouth/ryoku/ryoku.script` plus the theme's PNG assets | Dark window, branded progress bar and lock icon. |
-| SDDM greeter | `ryoku/lockscreen/sddm/` | Greek Noir greeter. |
-| Hyprland session, Quickshell pill, sidebar, lockscreen, Hub | `Theme.brand = "#F25623"` (see `ryoku/shell/quickshell/pill/Singletons/Theme.qml`) | Brand orange accents across the shell. Wallust drives the rest of the palette from the wallpaper; the brand constant does not theme. |
-| Themes (full-system rices) | `ryoku/hyprland/themes/<theme>/` | Greek Noir is the brand-accurate theme; the others (catppuccin, tokyo-night, gruvbox, rose-pine, nord, and the rest) are user-selectable but not "the brand". |
-| Terminal startup greeting | `ryoku/apps/fish/config.fish`, `ryoku/apps/kitty/`, `ryoku/apps/fastfetch/config.jsonc`, `ryoku/apps/fastfetch/ryoku-fastfetch` | Kitty starts fish; fish runs `ryoku-fastfetch` on interactive start; fastfetch renders `logo-mark.png` with Kitty graphics and brand-orange section keys. |
+Everything else is derived from the wallpaper by matugen, so the desktop
+recolors while the brand stays put. A sun is a sun on any wallpaper. Before a
+palette exists, the compiled defaults are black paper (`#000000`) and bone ink
+(`#cdc4ba`); see [Themes & wallpapers](/docs/theming).
 
 ## Typography and cursor
 
-- **Mono / UI default:** JetBrains Mono Nerd Font.
-- **Fallback / CJK coverage:** Noto Sans (and `noto-fonts-cjk` for `力`).
-- **Cursor theme:** Bibata.
+- **Display headlines:** Fraunces.
+- **Interface:** Space Grotesk.
+- **Code and labels:** JetBrains Mono Nerd Font.
+- **Fallback and CJK:** Noto, which renders the 力 consistently on every
+  install.
+- **Cursor:** Bibata.
 
-These are fixed brand defaults. Wallust changes the surface palette, not the
-mark, the typeface, or the cursor.
+These are fixed. The palette changes with the wallpaper; the marks, the
+typefaces and the cursor do not.
+
+## Where the brand shows up
+
+| Surface | What renders |
+| --- | --- |
+| GitHub README | The 力 seal above the project name. |
+| These docs | The wordmark in the header and the seal as the favicon. |
+| The wallpaper picker | The seal on the picker's masthead. |
+| Limine boot menu | Ryoku's boot colors, kept in step by `ryoku doctor`. |
+| The shell, Hub and lock screen | The vermillion accent on the frame, the masthead and alerts. |
+| Rashin | Its own seal, the needle, beside the 力. |
 
 ## What "on-brand" means
 
-A surface is on-brand if:
-
-1. **The accent color the eye lands on first is `#F25623`.** Status indicators,
-   branded headings, the kanji mark, the boot-menu title.
-2. **Dark backgrounds default to `#171717`** with `#333333` as the lifted "card"
-   tone. No pure black.
-3. **Body text on dark is `#CCD0CF` (bright) or `#aeab94` (subdued).** Subdued
-   is for taglines and annotations. Pure white is reserved for emphasis on
-   light surfaces.
-4. **The kanji `力` is the primary mark, not the wordmark.** The wordmark
-   exists for places that already have spatial / typographic context (TTY
-   banners, ASCII headers). When in doubt, use the kanji square.
-5. **No emoji as logo.** The mark is the kanji, the kanji is the mark.
-
-User-selectable themes (Catppuccin, Tokyo Night, Gruvbox, Rose Pine, Nord, and
-the rest) are first-class but they are user expression, not the brand. The
-brand is Greek Noir plus the kanji mark.
+1. **The accent the eye lands on first is the vermillion.** It sits on the
+   frame and the masthead, never spread across the content.
+2. **Depth is a hairline, not a shadow.** Surfaces are flat with a thin bone
+   line; a shadow appears only where something genuinely floats.
+3. **The 力 is the primary mark.** Use it as a mark, not as decoration.
+4. **No emoji as a logo.** The seal is the mark.
 
 ## Don't-do list
 
-- Don't recolor the kanji mark. The orange is the brand.
-- Don't substitute a different kanji or character. `力` is the brand mark.
-- Don't ship the wordmark without the kanji where space allows for both.
-- Don't introduce a third accent color. If you need a second accent, use the
-  bright orange `#F56E0F` already in the palette.
-- Don't add gradients to the kanji. Flat fill only.
-- Don't use the brand orange for error states; the palette includes `#aeab94`
-  for muted callouts and the standard ANSI red is acceptable for errors.
+- Don't recolor the seal or the wordmark beyond the light and dark variants.
+- Don't substitute a different kanji or character. 力 is the mark.
+- Don't add gradients, outlines or shadows to the marks.
+- Don't introduce another fixed accent. Everything that is not the brand
+  follows the wallpaper.
+- Don't use the vermillion for decoration; it means brand or alert.
 
 ## See also
 
 - [Vision](/docs/vision) for the verbal frame around the brand.
-- [Customize](/docs/customize) for switching themes without touching the brand.
+- [Themes & wallpapers](/docs/theming) for how the derived colors work.
 - [Omarchy heritage](/docs/omarchy-heritage) for what Ryoku adapts and what is
   Ryoku-owned.

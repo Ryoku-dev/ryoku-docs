@@ -29,10 +29,10 @@
     "eyebrows": "section",
     "codeblocks": "dark"
   },
-  "favicon": "/assets/brand/logo.svg",
+  "favicon": "/assets/brand/favicon.png",
   "logo": {
-    "light": "/assets/brand/light.png",
-    "dark": "/assets/brand/dark.png"
+    "light": "/assets/brand/wordmark-light.png",
+    "dark": "/assets/brand/wordmark-dark.png"
   },
   "seo": {
     "indexing": "all",

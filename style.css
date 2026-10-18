@@ -1,12 +1,12 @@
 /*
- * Ryoku docs — Greek-noir, ported from ryoku.dev.
+ * Ryoku docs: Greek-noir, ported from ryoku.dev.
  *
  * docs.json carries the load-bearing brand: near-black background, vermillion
  * accent, Fraunces headings, Space Grotesk body. This file adds only what
  * docs.json cannot: the paper grain, JetBrains Mono for code, and Noto Sans JP
  * so the brand kanji renders like the site. It targets only real HTML tags and
- * Mintlify's stable ID hooks (verified present with `mint dev`) — no component
- * internals, nothing dead or brittle.
+ * Mintlify's stable ID hooks (verified present with `mint dev`), never
+ * component internals, so nothing here is dead or brittle.
  *
  * Palette mirrors ryoku-site app/assets/css/tokens.css.
  */
@@ -17,7 +17,7 @@
   --ryoku-sun: #e2342a;
   --ryoku-sun-ink: #fbeee2;
   --ryoku-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-  /* Paper grain (SVG fractal noise) — identical source to the website. */
+  /* Paper grain (SVG fractal noise), the same source as the website. */
   --ryoku-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
 }
 
