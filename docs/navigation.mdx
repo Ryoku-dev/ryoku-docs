@@ -1,12 +1,14 @@
 ---
 title: Navigation
-description: Open, focus, move, resize, float, and tile windows across workspaces — the everyday Ryoku desktop workflow, from the keyboard.
+description: Open, focus, move, resize, float, and tile windows across workspaces. The everyday Ryoku desktop workflow, from the keyboard.
 icon: table-columns
 ---
 
-Hyprland is a tiling compositor. New windows claim their share of the screen
-automatically — no dragging, no overlapping stacks to shuffle. You drive the
-whole desktop from the keyboard, and `Mod` is `Super` (the Windows or Cmd key).
+Hyprland and niri are tiling window managers. New windows claim their share of
+the screen automatically: no dragging, no overlapping stacks to shuffle. You
+drive the whole desktop from the keyboard, and `Mod` is `Super` (the Windows or
+Cmd key). Some details below differ on niri, which scrolls windows in columns;
+Kit (`Mod + K`) lists the exact keys for the window manager you run.
 
 This page walks the everyday workflow. [Keybindings](/docs/keybindings) is the
 exhaustive reference for every shipped bind; come back here for how they fit
@@ -14,8 +16,8 @@ together.
 
 ## Open a couple of windows
 
-When you log in nothing is open, because a tiling compositor only shows what you
-launch. Open one window, then a second, and watch Hyprland split the screen
+When you log in nothing is open, because a tiling window manager only shows
+what you launch. Open one window, then a second, and watch the screen split
 between them.
 
 <Steps>
@@ -24,14 +26,14 @@ between them.
     because it is the only window.
   </Step>
   <Step title="Open the browser beside it">
-    `Mod + B` opens the browser (`chromium`). It tiles in next to the terminal,
-    each taking half the screen. Every new window slots into the current layout
-    the same way.
+    `Mod + B` opens your browser (Firefox unless you picked another). It tiles
+    in next to the terminal, each taking half the screen. Every new window
+    slots into the current layout the same way.
   </Step>
 </Steps>
 
 `Mod + Q` closes the active window. The launcher (`Mod + Space`) opens anything
-else — type to filter, `Enter` to launch.
+else: type to filter, `Enter` to launch.
 
 ## Focus and move windows
 
@@ -42,11 +44,11 @@ Focus follows **direction**, not a fixed cycle order.
 | `Mod + Arrow` | Move focus to the neighbour in that direction. |
 | `Mod + Shift + Arrow` | Move the active window in that direction. |
 
-There is no cycle-through-every-window bind. To jump straight to a specific
-window, open the launcher (`Mod + Space`) and type its title or app name — the
-launcher lists open windows alongside apps and focuses the one you pick. The
-[overview](#the-overview) (`Mod + Tab`) is the visual alternative: click any
-window to focus it.
+`Alt + Tab` jumps back to the previously focused window. To jump straight to a
+specific window, open the launcher (`Mod + Space`) and type its title or app
+name: the launcher lists open windows alongside apps and focuses the one you
+pick. The [overview](#the-overview) (`Mod + Tab`) is the visual alternative:
+click any window to focus it.
 
 ## Resize windows
 
@@ -54,17 +56,17 @@ Two ways, depending on whether you want a quick nudge or a sustained resize.
 
 - **Nudge.** `Mod + Ctrl + Arrow` grows or shrinks the active window a step at a
   time. Hold it to keep resizing.
-- **Resize mode.** `Mod + R` enters a resize submap and pops a toast. Now the
-  bare **arrows** — or `hjkl` — resize the window; `Esc` (or `Return`, or
-  `Mod + R` again) leaves the mode. The submap is exclusive, so plain arrows
-  resize instead of moving focus.
+- **Resize mode.** `Mod + R` enters resize mode. Now the bare **arrows** (or
+  `hjkl`) resize the window, and `Esc` leaves the mode.
 
 ## Float and fullscreen
 
 - `Mod + F` toggles fullscreen for the active window.
-- `Mod + A` floats the active window at **1000 × 660, centred**. Press it again
-  to tile the window back into the layout. Reach for it when you want a
-  calculator, a small dialog, or one window lifted out of the tiles.
+- `Mod + A` floats the active window, centred. Press it again to tile it back
+  into the layout. Reach for it when you want a calculator, a small dialog, or
+  one window lifted out of the tiles.
+- `Mod + D` fills the screen width while keeping the gaps and the bar, and
+  `Mod + C` centres the window.
 
 ## Workspaces
 
@@ -73,13 +75,14 @@ Each monitor carries ten workspaces.
 | Press | Does |
 | --- | --- |
 | `Mod + 1 … 0` | Focus workspace N on the monitor under the cursor. |
-| `Mod + Alt + 1 … 0` | Send the active window to workspace N. |
+| `Mod + Alt + 1 … 0` | Send the active window to workspace N and follow it. |
+| `Mod + Shift + 1 … 0` | Send the active window to workspace N and stay here. |
 | `Mod + Scroll` | Cycle to the previous / next workspace. |
 | `Mod + Tab` | Open the overview (workspace expo). |
 
 The number keys are **desktop-relative**. A *desktop* is a block of ten
 workspace ids, so on desktop 2, `Mod + 3` focuses workspace 13, never
-workspace 3 — each desktop keeps its own 1–10 and windows never jump between
+workspace 3. Each desktop keeps its own 1–10 and windows never jump between
 desktops. The workspace is also pulled to whichever monitor the cursor is on,
 so the same keys drive every screen instead of always yanking focus to the
 laptop panel.
@@ -95,21 +98,19 @@ a scaled mini-desktop with live window previews. From here you can:
 - Hover a window for a `✕` to close it.
 - Scroll or `Tab` to move the selection, `Enter` to commit, `Esc` to dismiss.
 
-A second level shows your **desktops** — each a block of ten workspaces with its
+A second level shows your **desktops**, each a block of ten workspaces with its
 own 01–10 set, so you can keep separate groups of workspaces for different work.
 `Mod + Alt + Tab` steps between desktops (`Tab` again inside the overview cycles
 them).
 
 ## Scratchpad
 
-The scratchpad is a hidden special workspace for a window you want one keypress
-away — a notes terminal, a chat, a music player.
+The scratchpad is a hidden workspace for a window you want one keypress away,
+such as a notes terminal, a chat or a music player.
 
-- `Mod + H` toggles the scratchpad in and out of view.
-- `Mod + Shift + H` stashes the active window into it (floated at 1280 × 800,
-  centred).
-
-Press `Mod + H` again to tuck it back out of sight.
+- `Mod + H` tucks the active window into the scratchpad. Press it again on that
+  window to bring it back.
+- `Mod + Alt + H` shows or hides the scratchpad.
 
 ## Mouse
 
@@ -122,12 +123,13 @@ You rarely need the mouse, but it is there when a quick drag is faster:
 
 Ryoku is monitor-aware. Because `Mod + 1 … 0` pulls the target workspace to the
 monitor your cursor is on, the workspace keys always act on the screen you are
-pointing at — you never reach for a different set of binds per display.
+pointing at, so you never reach for a different set of binds per display.
 
-`Mod + P` toggles mirror versus extend (`ryoku-monitor toggle`). Set
-resolutions, scale, rotation, and layout in
-[Settings](/docs/settings) → Displays; see [Hardware](/docs/hardware) for the
-details.
+`Mod + Alt + Arrow` focuses the screen in that direction, and adding `Shift`
+sends the active window there. `Mod + P` cycles the displays through internal
+only, external only and both. Set resolutions, scale, rotation and layout on
+the **Displays** page of [Settings](/docs/settings); see
+[Hardware](/docs/hardware) for the details.
 
 ## Next
 

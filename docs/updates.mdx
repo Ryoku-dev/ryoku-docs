@@ -1,49 +1,65 @@
 ---
 title: Updates
-description: How Ryoku updates itself, wraps each run in a snapper snapshot when configured, and rolls back when something breaks.
+description: How Ryoku updates its own packages, keeps the distribution base on its own lane, wraps runs in snapshots, and rolls back when something breaks.
 icon: rotate
 ---
 
-Ryoku updates through one command: `ryoku update`. When the system meets the
-snapshot prerequisites it takes a snapper pre-snapshot, then brings the system
-current from the signed `[ryoku]` repo, re-lays the base config with
-`ryoku materialize`, and reloads the shell. There is one channel (`main`);
-there is no channel switching, no git-pull update, and no ordered migration
-ledger.
+Ryoku updates through one command, `ryoku update`, or **Update now** on
+**Ryoku Settings > Updates**. It brings the Ryoku packages current from the
+signed Ryoku repository for your edition (pacman, XBPS or RPM), re-lays the base
+config with `ryoku materialize`, runs `ryoku doctor`, and reloads the shell.
+When the system meets the snapshot prerequisites, the run is wrapped in a
+snapper pre and post snapshot.
 
 This page covers the update and snapshot model. The full `ryoku` command
-reference — every flag for `update`, `status`, `snapshots`, `rollback`,
-`doctor`, and `recovery` — lives in [CLI](/docs/cli).
+reference (every flag for `update`, `status`, `track`, `snapshots`, `rollback`,
+`doctor` and `recovery`) lives in [CLI](/docs/cli).
+
+## Two lanes
+
+| Lane | Command | What moves |
+|---|---|---|
+| **Ryoku** | `ryoku update` | Ryoku's packages from its signed repository, then config and doctor |
+| **Your distribution** | `sudo pacman -Syu` (Arch, CachyOS), `sudo xbps-install -Syu` (Void), `sudo dnf5 upgrade --refresh` (Fedora) | the base system and its kernel |
+
+`ryoku update` never moves the kernel or the distribution base on its own: a
+Ryoku release stays reversible, and a box that cannot take a distribution
+upgrade today can still take a Ryoku fix. Every run reports how many
+distribution packages are waiting, and the Updates page lists them.
+`ryoku update --system` runs both lanes under one snapshot pair when you want
+that; on Void it is the way to keep base updates covered by snapshots.
+
+## Channels
+
+| Channel | What it follows |
+|---|---|
+| **stable** | named releases, as signed packages (the default) |
+| **unstable** | the `unstable-dev` branch, fast-forwarded to the last commit the Testing gate passed |
+
+`ryoku track unstable` moves a box to the unstable channel and
+`ryoku track stable` brings it back. `ryoku track <version>` pins one frozen
+release or unstable build, and `ryoku rollback --to <version>` moves the Ryoku
+package set to one without a reboot.
 
 ## What `ryoku update` does
 
-On a packaged install the run is:
-
-1. Take a snapper pre-snapshot (best-effort, an unconfigured snapper never
+1. Take a snapper pre-snapshot (best-effort; an unconfigured snapper never
    blocks the update).
-2. `sudo pacman -Syu` to refresh and upgrade everything from the official Arch
-   repos and the `[ryoku]` repo.
-3. `yay -Sua` (when yay is present) to update any AUR packages.
-4. `ryoku materialize` to re-lay Ryoku's base config under `~/.config`,
-   override-safe.
+2. Upgrade the installed Ryoku packages from the signed Ryoku repository.
+3. `ryoku materialize` to re-lay Ryoku's base config under `~/.config`. Your own
+   edits live in `~/.config/ryoku/user_edits` and survive every update.
+4. `ryoku doctor` to reconcile stateful drift. It also installs, once, an app
+   Ryoku now ships by default that this box has never had; an app you removed
+   stays removed.
 5. Reload the shell.
 6. Take a snapper post-snapshot.
 
-Throughout, progress is published to `$XDG_RUNTIME_DIR/ryoku-update.json`, which
-the shell's update island reads to show the run in the bar.
+Throughout, progress is published to `$XDG_RUNTIME_DIR/ryoku-update.json`,
+which the shell's update island reads to show the run in the bar.
 
 ```bash
 ryoku update
 ```
-
-`ryoku update` also calls `ryoku doctor` itself, so stateful drift gets
-reconciled as part of the same run.
-
-<Info>
-On a maintainer's dev checkout the same command fetches the channel branch,
-fast-forwards, and redeploys with `ryoku/shell/deploy.sh`. The auto-detection
-is automatic; you do not pick a mode.
-</Info>
 
 ## Status
 
@@ -111,15 +127,16 @@ what it would change without touching anything.
 ryoku doctor --check
 ```
 
-For the full reconciler set and every doctor flag — `--check`, `--report`, and the opt-in, read-only
-`--explain` — see [CLI](/docs/cli). To lean on doctor while chasing a specific
-problem, see [Troubleshoot](/docs/troubleshoot).
+For the full reconciler set and every doctor flag (`--check`, `--report`, and
+the opt-in, read-only `--explain`), see [CLI](/docs/cli). To lean on doctor
+while chasing a specific problem, see [Troubleshoot](/docs/troubleshoot).
 
 ## Recovery
 
 When the desktop is too broken to update normally (a half-applied upgrade, a
 corrupt config, a broken local build), `ryoku recovery` is the last resort. It
-resets to `main` and redeploys, overwriting configs. It hands off to
+always restores the stable channel: it pulls `main`, reinstalls the base
+packages and redeploys the desktop, overwriting Ryoku's configs. It hands off to
 `bin/ryoku-recovery`, preferring a local copy and otherwise fetching the
 canonical script over the network, so it still works when the local install is
 broken.
@@ -134,27 +151,24 @@ offers the same snapper snapshots if the disk itself still boots.
 
 ## Where the packages come from
 
-The desktop ships as signed pacman packages from the `[ryoku]` repo
-(`release/packages/`). `ryoku-desktop` is the umbrella package and depends on
-`ryoku-shell`, `ryoku-hub`, `ryoku`, `ryoku-blobs`, and `ryoku-keyring`. The
-installer adds the `[ryoku]` repo, imports the release key from
-`ryoku-keyring`, and installs `ryoku-desktop`; from then on, `ryoku update`
-keeps the machine current.
+The desktop ships as signed packages from the Ryoku repository for each
+edition: pacman on Arch and CachyOS, XBPS on Void, RPM on Fedora.
+`ryoku-desktop` is the umbrella package; the installer adds the repository,
+imports the release key, installs `ryoku-desktop` and the variant for your
+window manager, and from then on `ryoku update` keeps the machine current.
+Apps you left out at install time are recorded and never added back.
 
-`ryoku update` upgrades installed packages. It does not pacstrap newly listed
-ones, so a newly added base package reaches only fresh installs.
-
-Because every `[ryoku]` package is signed and pacman verifies it on install, an
-update only ever applies packages from the real release key. See
+Because every Ryoku package is signed and verified on install, an update only
+ever applies packages from the real release key. See
 [Security](/docs/security) for how to verify releases yourself.
 
 ## State the CLI keeps
 
-The CLI keeps its state under `~/.local/state/ryoku/` — deploy pointers on dev
-machines, the `materialized` manifest of Ryoku-owned files, and the latest
-`doctor-report.txt`. During a run it publishes live progress to
-`$XDG_RUNTIME_DIR/ryoku-update.json` for the bar's update island. See
-[CLI](/docs/cli) for the full list.
+The CLI keeps its state under `~/.local/state/ryoku/`: the `materialized`
+manifest of Ryoku-owned files, the `provisioned` ledger of apps delivered or
+left out, and the latest `doctor-report.txt`. During a run it publishes live
+progress to `$XDG_RUNTIME_DIR/ryoku-update.json` for the bar's update island.
+See [CLI](/docs/cli) for the full list.
 
 ## See also
 

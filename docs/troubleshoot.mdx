@@ -58,15 +58,15 @@ contains no passwords or keys.
 
 When you want it to reason rather than match rules, `ryoku doctor --explain`
 sends that same report to a cloud model for a root-cause analysis and fix
-steps. It is opt-in, advisory, and read-only — it never runs anything, so a
-wrong answer can only mislead — and it uses your own key. See [CLI](/docs/cli)
-for configuring the key and the provider endpoint.
+steps. It is opt-in, advisory and read-only: it never runs anything, so a wrong
+answer can only mislead, and it uses your own key. See [CLI](/docs/cli) for
+configuring the key and the provider endpoint.
 
-The reconciler set is broad — the stateful drift a Ryoku machine accumulates
-across snapshots, packages, session components, and the generated Hyprland
-config — and it grows over time, so the current list lives in
-[CLI](/docs/cli). When something specific breaks, `ryoku doctor --check` tells
-you whether a reconciler already handles it.
+The reconciler set is broad (the stateful drift a Ryoku machine accumulates
+across snapshots, packages, session components and the generated compositor
+config) and it grows over time, so the current list lives in [CLI](/docs/cli).
+When something specific breaks, `ryoku doctor --check` tells you whether a
+reconciler already handles it.
 
 ## A read-only state check
 
@@ -208,26 +208,28 @@ one of the offered clean-divisor scales.
 
 ## Performance feels off
 
-- Animations: **Ryoku Settings > Appearance > Animations** toggles them.
-- Wallpaper backend: turning off animated or video wallpapers is the single
-  biggest GPU win.
-- Blur and shadows: **Ryoku Settings > Appearance > Decoration** tones them
-  down for integrated graphics.
+- Animations: the **Animations** page in Ryoku Settings turns them down or
+  off.
+- Wallpaper: turning off animated or video wallpapers is the single biggest
+  GPU win.
+- Blur and shadows: the **Performance** page trades eye candy for lower CPU,
+  GPU and memory use, and can follow the power profile so Power Saver strips
+  blur and shadows on its own.
 
 ## The installer won't advance past "Disk layout"
 
 Installing alongside Windows and pressing **Tab** on the **Disk layout** step
 does nothing? The alongside layout is blocked, and the screen shows a red `⚠`
-with the reason — almost always no unallocated free space (Windows fills the
-disk) or no EFI partition to reuse. Ryoku never resizes Windows, so you make
-room first: shrink the Windows partition, then reboot into the installer. The
-full walkthrough is in [Dual-boot with Windows](/docs/dual-boot). On a dedicated
-drive, press `esc` and choose **Erase whole disk** instead.
+with the reason. Usually there is no free space and no partition selected to
+shrink: select one and use `←`/`→` to give Ryoku room, or shrink Windows
+yourself first. A hibernated Windows volume (Fast Startup on) cannot be shrunk
+safely. The full walkthrough is in [Dual-boot with Windows](/docs/dual-boot).
+On a dedicated drive, press `esc` and choose **Erase whole disk** instead.
 
 ## Filing a useful bug
 
 Open an issue at
-[github.com/ryoku-dev/ryoku-arch/issues](https://github.com/ryoku-dev/ryoku-arch/issues)
+[github.com/Ryoku-dev/ryoku/issues](https://github.com/Ryoku-dev/ryoku/issues)
 with:
 
 1. What you did: keystrokes, clicks, or commands.

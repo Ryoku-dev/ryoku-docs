@@ -1,6 +1,6 @@
 ---
 title: Security
-description: How Ryoku stays trustworthy — signed releases you can verify, snapshots that undo a bad update, optional disk encryption, and a strictly local agent.
+description: How Ryoku stays trustworthy. Signed releases you can verify, snapshots that undo a bad update, optional disk encryption, and a strictly local agent.
 icon: shield-halved
 ---
 
@@ -11,10 +11,10 @@ commands to check them.
 
 ## Signed releases
 
-Every Ryoku ISO and every package in the `[ryoku]` repo is signed by the release
-identity `Ryoku Releases <releases@ryoku.dev>`. The canonical public key lives in
-the repo at
-[`keys/ryoku-release-key.pub.asc`](https://github.com/ryoku-dev/ryoku-arch/blob/main/keys/ryoku-release-key.pub.asc),
+Every Ryoku ISO and every package in the Ryoku repositories (pacman, XBPS and
+RPM) is signed by the release identity `Ryoku Releases <releases@ryoku.dev>`.
+The canonical public key lives in the repo at
+[`keys/ryoku-release-key.pub.asc`](https://github.com/Ryoku-dev/ryoku/blob/main/keys/ryoku-release-key.pub.asc),
 bound to git history, and ships alongside each ISO.
 
 The key fingerprint to verify against is:
@@ -36,7 +36,7 @@ signature and its checksum:
 
 ```bash
 # Import the release key
-curl -sSL https://raw.githubusercontent.com/ryoku-dev/ryoku-arch/main/keys/ryoku-release-key.pub.asc \
+curl -sSL https://raw.githubusercontent.com/ryoku-dev/ryoku/main/keys/ryoku-release-key.pub.asc \
   | gpg --import
 
 # Show the fingerprint and compare it against the one above
@@ -66,7 +66,7 @@ On a standard install (a btrfs root with snapper configured, which the ISO sets
 up) every `ryoku update` is wrapped in a pre/post snapshot pair. A bad update is
 never a dead end: roll back with `ryoku rollback`, and if the desktop will not
 come up, the same snapshots are selectable straight from the Limine boot menu.
-The full model — prerequisites, self-healing, and recovery — is in
+The full model (prerequisites, self-healing and recovery) is in
 [Updates](/docs/updates).
 
 ## Disk encryption
@@ -78,10 +78,10 @@ See [Install](/docs/install).
 
 ## Local-only Rashin
 
-Ryoku's agent OS, Rashin, is off by default and never leaves your machine when
-you do enable it: its daemon binds `127.0.0.1` only, rejects non-localhost
-WebSocket origins, and bundles no model of its own — you supply the provider. The
-knowledge vault it builds is plain markdown on your disk. See
+Ryoku's agent, Rashin, keeps everything on your machine: its daemon binds
+`127.0.0.1` only, rejects non-localhost WebSocket origins, and bundles no model
+of its own, so you choose the provider. The knowledge vault it builds is plain
+markdown on your disk, and you can leave Rashin out in the installer. See
 [Rashin](/docs/rashin) for the full picture.
 
 <Info>

@@ -1,54 +1,64 @@
 ---
 title: Rashin
-description: Ryoku's optional, local, off-by-default agent OS — a machine-generated knowledge vault, a localhost dashboard, and one-click agent setup.
+description: Ryoku's local AI agent. Ask on Alt+Space, the Rashin window, a knowledge vault of your machine, a localhost dashboard, and one-click Hermes setup.
 icon: robot
 ---
 
-Rashin (羅針, "compass needle") is Ryoku's optional agent OS. When you turn it
-on, it builds and maintains a map of your machine — a knowledge vault — that any
-coding agent can read instead of burning time rediscovering your system. It ships
-with the desktop but stays inert until you enable it, and everything it does
-stays on your machine.
+Rashin (羅針, "compass needle") is Ryoku's AI agent. It answers quick questions
+in the Ask bar (`Alt + Space`), does longer work in Agent mode and the Rashin
+window (`Super + Alt + Space`), shows your AI usage in the bar, and maintains a
+map of your machine, a knowledge vault, that any coding agent can read instead
+of rediscovering your system. Everything it does stays on your machine.
 
 Three pieces make it up:
 
 - A **knowledge vault** of generated markdown maps (your hardware, your desktop
   config, your packages, your own changes) that agents read and write.
-- A **local dashboard** on `127.0.0.1` with vitals, the vault, and a chat surface.
+- A **local dashboard** on `127.0.0.1` with vitals, the vault, and a chat
+  surface.
 - **One-click setup** for Hermes, the resident agent, wired to the vault.
 
-<Info>
-Optional means not running, not absent. The `ryoku-rashin` binary is installed
-with the desktop but does nothing until you flip the gate in Settings. Nothing
-indexes, listens, or wires before then.
-</Info>
+## In the installer
 
-## Turn it on
+The installers ask about Rashin with a short explanation, and the answer
+defaults to yes:
 
-Rashin is off by default. Enable it from the Hub:
+- **Yes** installs `ryoku-rashin`. Rashin runs the Hermes agent as its harness,
+  and Hermes installs at your first login: once the machine is online, a
+  terminal opens and runs the setup below. Offline, it waits for a later login.
+- **No** leaves `ryoku-rashin` out and records that, so updates never install
+  it. The Ask and Rashin shortcuts are not registered while it is absent.
+
+On Fedora and Void the desktop package requires `ryoku-rashin`, so it is always
+installed there and the switch only stops and starts the agent.
+
+## Turn it on or off later
 
 <Steps>
   <Step title="Open the Rashin panel">
-    Press `Mod + ,` to open [Ryoku Settings](/docs/settings), then go to
-    **Advanced > Rashin**.
+    Press `Mod + ,` to open [Ryoku Settings](/docs/settings), then open the
+    **Rashin** page. The master switch installs or removes Rashin where the
+    edition allows it.
   </Step>
-  <Step title="Run one-click setup">
-    The setup actuator runs in a floating terminal (never with `sudo`). It
-    installs Hermes if it is not already present, runs Hermes's onboarding so you
-    pick your own provider and model right there, wires the vault so agents read
-    it, and enables the daemon.
+  <Step title="Set up Hermes">
+    **Set up Hermes agent** runs the setup in a floating terminal (never with
+    `sudo`). It installs Hermes if it is not already present, runs Hermes's
+    onboarding so you pick your own provider and model, wires the vault so
+    agents read it, and enables the daemon. The same setup runs from a
+    terminal with `ryoku-rashin setup`.
   </Step>
   <Step title="Open the dashboard">
     When setup finishes it opens the dashboard at
-    [http://127.0.0.1:3600](http://127.0.0.1:3600). From now on the daemon starts
-    at login and keeps the vault current.
+    [http://127.0.0.1:3600](http://127.0.0.1:3600). From then on the daemon
+    starts at login and keeps the vault current.
   </Step>
 </Steps>
 
 <Note>
-If you already run Hermes, setup treats it as sacred: it skips install and
-onboarding entirely and only wires the vault, so your provider and model choices
-are untouched.
+If you already run Hermes, setup leaves it alone: it skips install and
+onboarding and only wires the vault, so your provider and model choices are
+untouched. The script installer also skips the first-login setup when it finds
+Hermes already installed.
 </Note>
 
 ## The vault
@@ -70,7 +80,7 @@ the notes.
 The generated files stay current on their own: Rashin reindexes on daemon start,
 on a timer, from the dashboard's reindex button, and after every `ryoku update`,
 so agents always see the system as it is now. Only the generated content is
-rewritten — anything you or an agent adds around it survives.
+rewritten; anything you or an agent adds around it survives.
 
 <Tip>
 Because the vault is plain markdown, it works with the coding agents you already
@@ -80,7 +90,7 @@ it points that agent at `AGENTS.md` so it reads the map before guessing paths.
 
 ## The dashboard
 
-The dashboard serves only on `http://127.0.0.1:3600` — localhost, single user, no
+The dashboard serves only on `http://127.0.0.1:3600`: localhost, single user, no
 remote listener. It is a self-contained page with a distinct Japanese
 retro-poster look, deliberately separate from the desktop theme.
 
@@ -96,7 +106,7 @@ retro-poster look, deliberately separate from the desktop theme.
 ## Quick asks
 
 You do not have to open the dashboard to ask a question. Two surfaces share the
-same brain — the daemon, the vault, and your Hermes connection:
+same brain (the daemon, the vault, and your Hermes connection):
 
 <Tabs>
   <Tab title="Launcher">
@@ -107,7 +117,7 @@ same brain — the daemon, the vault, and your Hermes connection:
   </Tab>
   <Tab title="Terminal">
     Run `rashin <what you want>` in the terminal. It answers from the same brain
-    and drops a ready-to-run command on your fish prompt — you press Enter to run
+    and drops a ready-to-run command on your prompt; you press Enter to run
     it. `rashin` never runs anything itself; the buffer is the confirmation. Every
     proposed command also carries a danger tier (read / write / system / danger).
   </Tab>
@@ -138,8 +148,8 @@ it](/docs/plugins#share-a-widget-you-made). Rearrangements take effect on the ba
 right away.
 
 <Note>
-To build against the real desktop, the agent reads its `ryoku` skill — `bar.md`
-for the QS Bar and `plugins.md`, the widget contract — and the vault's
+To build against the real desktop, the agent reads its `ryoku` skill (`bar.md`
+for the QS Bar and `plugins.md`, the widget contract) and the vault's
 [`desktop.md`](#the-vault), so it knows the host to target and where the bar's
 config lives.
 </Note>
@@ -154,18 +164,18 @@ Rashin is built to keep everything local:
   Rashin does not phone home.
 - **You bring your own model.** Rashin bundles no LLM. Hermes uses the provider
   and model you choose during setup, so where prompts go is your choice.
-- **Off until you say so.** The gate in `~/.config/ryoku/rashin.json` is the
+- **Off until you set it up.** The gate in `~/.config/ryoku/rashin.json` is the
   single source of truth; a disabled Rashin does nothing even if its service
   fires.
 
-For how Rashin fits Ryoku's wider security posture — signed releases, snapshots,
-and disk encryption — see [Security](/docs/security).
+For how Rashin fits Ryoku's wider security posture (signed releases,
+snapshots and disk encryption), see [Security](/docs/security).
 
 ## See also
 
 <CardGroup cols={2}>
   <Card title="Settings" icon="sliders" href="/docs/settings">
-    The Advanced > Rashin panel and the rest of the Hub.
+    The Rashin page and the rest of Ryoku Settings.
   </Card>
   <Card title="Security" icon="shield-halved" href="/docs/security">
     How Ryoku stays trustworthy, including local-only Rashin.

@@ -1,199 +1,196 @@
 ---
 title: The ryoku command
-description: The one CLI that updates, rolls back, inspects, and self-heals a Ryoku machine by orchestrating pacman, yay, and snapper.
+description: The one CLI that updates, pins, rolls back, inspects and self-heals a Ryoku machine on every edition.
 icon: terminal
 ---
 
-`ryoku` is the front door to the whole system. It updates the machine, rolls it
-back, reports its state, reloads the desktop, and repairs stateful drift, all
-from one Go program (`ryoku/cli/`). It does not reimplement package management
-or snapshots; it orchestrates `pacman`, `yay`, and `snapper` and adds the safety
-rails around them. Run `ryoku` with no arguments for the built-in usage.
+`ryoku` is the front door to the whole system. It updates the machine, moves it
+between channels, rolls it back, reports its state, reloads the desktop and
+repairs stateful drift, all from one Go program (`ryoku/cli/`). It does not
+reimplement package management or snapshots: it drives pacman, XBPS or DNF and
+snapper, and adds the safety rails around them. Run `ryoku help` for the
+built-in usage.
 
-## Two worlds: which install is this?
+## Two worlds
 
-Every command behaves with respect to one of the two ways Ryoku can live on a
-machine. Most confusion about the CLI comes from mixing them up.
+Every command behaves with respect to one of two ways Ryoku can live on a
+machine.
 
 <Tabs>
   <Tab title="Packaged install (normal)">
-    The desktop is installed from the `[ryoku]` pacman repo. `ryoku-desktop`
-    ships the base config under `/usr/share/ryoku/config`; there is no git
-    checkout and no build toolchain. This is what you have after installing from
-    the ISO or converting an existing Arch box.
+    The desktop is installed from Ryoku's signed repository with pacman, XBPS
+    or DNF. `ryoku-desktop` ships the base config under
+    `/usr/share/ryoku/config`; there is no git checkout and no build toolchain.
+    This is what the ISOs and the script installer give you.
   </Tab>
-  <Tab title="Dev checkout (maintainers)">
-    A clone of the monorepo on a maintainer's machine. There is no
-    `/usr/share/ryoku/config`; the desktop is laid down from the checkout by
-    `ryoku deploy`. The deploy records the checkout root and the commit it laid
-    down under `~/.local/state/ryoku/`, which is how the deployed `ryoku` binary
-    later finds the repo again.
+  <Tab title="Source checkout (unstable, maintainers)">
+    The desktop is built from a checkout of the repository and laid down by
+    `ryoku/shell/deploy.sh`. `ryoku track unstable` sets this up for testers;
+    the deploy records the checkout and the commit it laid down under
+    `~/.local/state/ryoku/`, which is how `ryoku` finds it again.
   </Tab>
 </Tabs>
 
-`ryoku update` auto-detects which world it is in, so the same command is correct
-on both. A recorded checkout means the git path; otherwise it takes the pacman
-path. A few commands belong to only one world; that is called out below.
+`ryoku update` detects which world it is in, so the same command is correct on
+both.
 
 ## At a glance
 
-| Command | What it does | Where | Who |
-| --- | --- | --- | --- |
-| `update` | Snapshot, then bring the system current and redeploy | both | you |
-| `status [--json]` | Version, how far behind, snapshot count | both | you, the Hub |
-| `rollback [id]` | Restore a snapper snapshot (no id: list them) | both | you |
-| `snapshots` | List snapper snapshots | both | you |
-| `reload` | Restart the shell and reload Hyprland | both | you |
-| `materialize` | Lay the base configs into `~/.config` | packaged install | the updater/installer |
-| `deploy` | Build and lay the desktop from a checkout | dev checkout | a maintainer |
-| `recovery` | Last resort: reset to `main` and redeploy | both | you, when broken |
-| `doctor` | Run idempotent reconcilers for stateful drift | both | you, the updater |
-| `keyboard` | The layout on the desktop, greeter, console, and boot prompt | both | you, the Hub |
-| `keyring` | How the login keyring unlocks at sign-in | both | you, the Hub |
+| Command | What it does |
+| --- | --- |
+| `update` | Snapshot where supported, then bring Ryoku current, re-lay config, run doctor, reload |
+| `status [--json]` | Channel, installed and latest version, waiting system packages, snapshot count |
+| `track <channel-or-version>` | Follow `stable` or `unstable`, or pin one release or build |
+| `rollback [id]` | List releases and snapshots; `--to <version>` moves back to a release |
+| `snapshots` | List the root snapshots where the edition provides them |
+| `reload` | Restart the shell and reload the window manager |
+| `reset [path]` | Drop one of your Ryoku Settings overrides, back to the default |
+| `owner <path>...` | Who writes a config file, and where your change belongs |
+| `doctor` | Run the idempotent reconcilers for stateful drift |
+| `wm` | The window-manager seam: `status`, `caps`, `use <name>` and more |
+| `plugin` | Create, validate, add, remove or share a shell plugin |
+| `keyboard` | One keyboard layout on the desktop, greeter, console and disk prompt |
+| `keyring` | How the login keyring unlocks at sign-in |
+| `security-key` | Enroll a FIDO2/U2F key for sudo, polkit or login |
+| `import <path>` | Bring in an existing dotfiles tree, with undo |
+| `recovery` | Last resort: restore the stable channel and redeploy |
 
 ## Everyday commands
 
-These are user-facing and work on any install.
-
 ### `ryoku update`
 
-The full, safe update. It is wrapped in a snapper pre/post snapshot pair
-(best-effort: an unconfigured snapper never blocks the update, but a failed step
-aborts before anything else changes). Throughout the run it publishes progress to
-`$XDG_RUNTIME_DIR/ryoku-update.json`, so the shell's update island shows the wave
-while the update runs. What it actually runs depends on the world:
+The full, safe update. Where the edition supports snapshots it is wrapped in a
+snapper pre and post pair; an unconfigured snapper never blocks the update, but
+a failed step aborts before anything else changes.
 
-<Tabs>
-  <Tab title="Packaged install">
-    <Steps>
-      <Step title="Snapshot">
-        Take a snapper pre-snapshot so the run is reversible.
-      </Step>
-      <Step title="System packages">
-        `sudo pacman -Syu`.
-      </Step>
-      <Step title="AUR packages">
-        `yay -Sua`, if `yay` is present.
-      </Step>
-      <Step title="Materialize config">
-        `ryoku materialize` lays the refreshed base config into `~/.config`.
-      </Step>
-      <Step title="Reload">
-        Restart the shell and reload Hyprland so the new config is live.
-      </Step>
-    </Steps>
-  </Tab>
-  <Tab title="Dev checkout">
-    Updates through the git channel (`main` for everyone). It fetches the channel
-    branch, fast-forwards the checkout when it is sitting cleanly on that branch,
-    and redeploys with `deploy.sh`. A feature branch or a dirty tree is left to
-    git; only the redeploy runs.
-  </Tab>
-</Tabs>
+On a packaged install it moves the packages Ryoku's signed repository serves,
+by name, then lays the refreshed config in with `ryoku materialize`, runs
+`ryoku doctor` and reloads the shell. It leaves your distribution's own
+upgrade (`sudo pacman -Syu`, `sudo xbps-install -Syu`, `sudo dnf5 upgrade
+--refresh`) to you and reports how many of those packages are waiting. On a
+source checkout it fast-forwards to the last commit that passed the Testing
+gate and redeploys.
 
-`ryoku update` also runs `ryoku doctor` itself, so self-healing happens on every
-update. See [Updates](/docs/updates) for the snapshot model and channel details.
+| Flag | What it does |
+| --- | --- |
+| `--system` | Also run the distribution upgrade, under the same snapshot pair. |
+| `--wait` | Wait for a channel build or source check that is still running. |
+| `--force` | Update despite a build or check in progress. |
+| `-v`, `--verbose` | Stream the raw output instead of the summary. |
+| `--gui` | Run in the background, driven from the Updates page of Ryoku Settings. |
+
+On a terminal the run is a short console: one line per step, a progress bar and
+a closing card. Everything the tools print goes to
+`~/.local/state/ryoku/update-log.txt`; on failure the card shows the error and
+the last lines, and offers the pre-update snapshot. Progress is also published
+to `$XDG_RUNTIME_DIR/ryoku-update.json` for the bar's update island. See
+[Updates](/docs/updates) for the model.
 
 ### `ryoku status [--json]`
 
-A read-only report; it changes nothing. It always prints the active config base.
-On a checkout it shows the channel, the deployed commit (`installed`), and how
-many commits behind the channel you are. On a packaged install it shows the
-installed `ryoku-desktop` version, what the `[ryoku]` repo offers, and the count
-of pending package updates (via `checkupdates` from `pacman-contrib`). It ends
-with the snapshot count.
+A read-only report. It prints the active config base, the installed
+`ryoku-desktop` version, what the signed repository offers, and the waiting
+distribution packages as `system:`. A source checkout shows the channel, the
+deployed commit and how far behind it is. When the channel is still building
+or its last build failed, a `build:` line says so. `--json` is the data seam
+the Hub and the update island read.
 
-```bash
-ryoku status
-```
+### `ryoku track <channel-or-version>`
 
-`--json` is the data seam the Hub and the update island read; it is not meant for
-humans.
+`stable` follows named releases as signed packages. `unstable` builds the box
+from the `unstable-dev` branch and, from then on, `ryoku update` fast-forwards
+to the last commit the Testing gate passed. A release tag or an unstable build
+name pins that frozen version as packages. `ryoku track stable` returns a box
+to packages. The package managers move channels in one transaction and restore
+the previous repository if the move fails.
 
 ### `ryoku rollback [id]`
 
-Restore a snapper snapshot after a bad change.
+With no arguments it lists published releases and, where the edition supports
+them, local snapshots. `ryoku rollback --to <version>` moves the Ryoku package
+set to a frozen release without a reboot; the distribution base and kernel do
+not move. After such a move the boot guard watches the next boots and moves the
+Ryoku set back if two boots fail to reach a healthy desktop.
 
-```bash
-ryoku rollback        # list snapshots, then pick one
-ryoku rollback 42     # roll back to snapshot 42
+`ryoku rollback <id>` walks you through a whole-system restore:
+
+<Tabs>
+  <Tab title="Arch, CachyOS, Void">
+    Reboot, choose **Ryoku Linux > Snapshots > id** in the Limine menu, run
+    `sudo limine-snapper-restore`, then reboot into the restored system.
+  </Tab>
+  <Tab title="Fedora">
+    The snapshots are under **Ryoku snapshots** in GRUB (hold Shift or press Esc
+    while booting). A snapshot boots read-only; to keep it, run
+    `sudo ryoku boot-menu restore` in that boot.
+  </Tab>
+</Tabs>
+
+### `ryoku snapshots`, `ryoku reload`, `ryoku reset`
+
+- `ryoku snapshots` lists the root snapshots on editions that provide them.
+- `ryoku reload` restarts the shell and reloads the window manager. Use it after
+  a hand edit to config that is already in place.
+- `ryoku reset [path]` drops an override from `~/.config/ryoku/user_edits`, so
+  that file goes back to the Ryoku default. With no path, and after a confirm,
+  it drops them all.
+
+### `ryoku owner <path>...`
+
+Answers the question to ask before touching a config file: who writes it, and
+where your change belongs so an update does not overwrite it.
+
+```text
+$ ryoku owner ~/.config/kitty/kitty.conf
+/home/you/.config/kitty/kitty.conf
+  class:   ryoku
+  writer:  the ryoku-desktop package, through materialize
+  advice:  Ryoku ships this and overwrites it on every update. Put your change in ~/.config/kitty/user.conf instead.
+  edit:    /home/you/.config/kitty/user.conf
 ```
 
-With no id it lists the snapshots so you can choose. With an id it runs
-`sudo snapper rollback <id>`. The same snapshots are selectable from the Limine
-boot menu, so a machine that will not boot back into Hyprland can still be
-recovered from the bootloader. See [Troubleshoot](/docs/troubleshoot) for the
-recovery playbook.
-
-### `ryoku snapshots`
-
-List the snapper snapshots (`sudo snapper list`). Requires snapper.
-
-### `ryoku reload`
-
-Restart the shell and reload Hyprland by handing off to `ryoku-shell reload`. Use
-it after changing config that is already in place, for example a hand-edit to
-`~/.config/hypr/user.lua`.
-
-```bash
-ryoku reload
-```
+`--json` prints the same for a tool, and `--map` prints an ownership summary of
+the whole machine.
 
 ## Keep it healthy: `ryoku doctor`
 
 `ryoku doctor` runs the convergent reconcilers: idempotent checks (and, where it
 is safe, fixes) for stateful drift the package and config layers cannot express.
-Each reconciler reports `ok` when the machine matches the desired state,
-otherwise it converges, proposes the exact fix, or flags it for a human. A
-healthy machine is quiet.
+A healthy machine is quiet.
 
 ```bash
-ryoku doctor          # heal what is safe to heal
-ryoku doctor --check  # or -n: show the full list, change nothing
+ryoku doctor            # heal what is safe to heal
+ryoku doctor --check    # or -n: show what is wrong, change nothing
+ryoku doctor --verbose  # also list the checks that passed
 ```
 
 <Note>
   `ryoku update` runs `ryoku doctor` for you, so a finding never aborts an
-  update. Run it by hand any time you suspect drift.
+  update. Ryoku Settings shows the same findings as a system check.
 </Note>
 
-The reconcilers are a living set (each retires once every supported install has
-run it, so the list stays small rather than growing like a migration ledger).
-The current set in `ryoku/cli/doctor.go` covers:
-
-- **Disk and snapshots:** swap kept out of snapshots, snapper configuration,
-  btrfs device health.
-- **Boot:** Limine boot-menu layout, stale install crypt mapper.
-- **Packages:** stale pacman database lock, the ryoku package channel and
-  keyring, pending `.pacnew` config, orphaned packages.
-- **Session and desktop:** desktop session components, Hyprland config
-  integrity (it revalidates and repairs the generated `monitors.lua`/`gpu.lua`
-  drop-ins so a corrupt one cannot strand the desktop in emergency mode), the
-  ryoku shell daemon, failed services, cursor theme, SDDM greeter theme.
-- **Display and hardware:** display backlight, display resolution, NVIDIA boot
-  reliability.
+The reconcilers live in `ryoku/cli/internal/doctor/` and cover desktop
+sessions, channel health, the keyring, compositor config, displays and
+backlights, pending package config, orphaned packages, duplicate launcher
+entries and more, with host-specific checks on each edition. Each one retires
+once every supported install has run it.
 
 ### When doctor cannot fix it: `--report`
-
-When doctor cannot fix something (or finds an unknown problem) it writes a single
-shareable text report and points you to it. Generate one any time:
 
 ```bash
 ryoku doctor --report        # writes ~/.local/state/ryoku/doctor-report.txt
 ryoku doctor --report bug.txt
 ```
 
-It bundles the findings with system state (btrfs usage and device errors,
-`/proc/swaps`, failed units, recent journal errors, pacman state, the ryoku
-channel state, session env, and hardware: backlight devices, GPU drivers, kernel
-cmdline, recent display-driver log) into one `.txt` the maintainers can read. It
-contains no passwords or keys.
+The report bundles the findings with system state (disk and snapshot health,
+failed units, recent journal errors, package and channel state, session
+environment, GPU and display drivers) into one text file to attach to a bug
+report. It contains no passwords or keys.
 
 ### When you want it to reason: `--explain`
 
 `ryoku doctor --explain` sends that same report to a cloud model and prints its
-root-cause analysis and fix steps, reaching the long tail the reconcilers cannot
-pre-encode.
+root-cause analysis and fix steps.
 
 <Warning>
   `--explain` is strictly **advisory and read-only**: it never runs anything, so
@@ -201,24 +198,29 @@ pre-encode.
   nothing is sent unless you set one.
 </Warning>
 
-Any OpenAI-compatible endpoint works. Defaults target Groq (free, fast):
+Any OpenAI-compatible endpoint works. Defaults target Groq:
 
 ```bash
 export RYOKU_AI_KEY=...   # or write it to ~/.config/ryoku/ai-key
 ryoku doctor --explain
 ```
 
-For OpenRouter's free models, override the URL and model (see
-[Environment and state](#environment-and-state) below).
+## Window manager
+
+- `ryoku wm status` names the running window manager and its provider;
+  `ryoku wm caps` lists what it can do.
+- `ryoku wm use <name>` switches window manager: it installs that desktop
+  variant if needed, previews anything the target cannot honour, and tells you
+  to log out and pick it at the greeter. The one you leave stays installed
+  unless you add `--remove-previous`. The **Compositor** tab on the window
+  manager page of Ryoku Settings does the same.
 
 ## One layout everywhere: `ryoku keyboard`
 
-A keyboard layout has to land in four places, and only one of them is the
-desktop: Hyprland's config, the X11 file the SDDM greeter reads,
-`/etc/vconsole.conf` for the TTYs, and a copy of that file baked into the boot
-image, which is what the disk passphrase prompt uses. The last one is the trap:
-mkinitcpio copies the keymap in at build time, so editing the file later, even
-through `localectl`, never reaches the passphrase prompt.
+A keyboard layout has to land in four places: the window manager, the SDDM
+greeter, the console, and the boot image, which is what the disk passphrase
+prompt uses. The last one is the trap: the keymap is copied in when the boot
+image is built, so editing it later never reaches the passphrase prompt.
 
 | Command | What it does |
 | --- | --- |
@@ -226,102 +228,64 @@ through `localectl`, never reaches the passphrase prompt.
 | `keyboard detect` | The layout this machine records, and which source said so. |
 | `keyboard apply [layout]` | Write the greeter and console keymap, then rebuild the boot image so the passphrase prompt follows. `--no-boot` skips the rebuild. |
 
-With no layout argument, `apply` pushes the desktop's own layout out. The
-Displays-page "Apply system-wide" button runs the same command, and `doctor`
-reports the drift with the exact fix.
+With no layout, `apply` pushes the desktop's own layout out, and `doctor`
+reports any drift with the exact fix.
+
+## Sign-in: `ryoku keyring` and `ryoku security-key`
+
+`ryoku keyring` chooses how the GNOME keyring unlocks your saved passwords at
+sign-in. The default, `never-ask`, means no app ever prompts;
+`unlock-on-login` keeps the store encrypted and unlocks it with your login
+password; `ask` leaves it locked until an app asks. The Lockscreen page in
+Ryoku Settings drives the same choice.
+
+`ryoku security-key` enrolls a FIDO2/U2F key and turns it on for `sudo`,
+polkit prompts or login, either instead of the password or together with it.
 
 ## Config lay-down: `ryoku materialize`
 
-`ryoku materialize` lays Ryoku's base configs into `~/.config`, declaratively and
-**override-safe**. It copies every file the package ships under the base config
-dir (clobbering the previous Ryoku copy), prunes files a past release shipped but
-this one dropped (tracked by a manifest at `~/.local/state/ryoku/materialized`),
-and never touches files the package never shipped.
-
-<Info>
-  Your own overrides survive every `materialize`: `hypr/user.lua`,
-  `hypr/monitors_user.lua`, `kitty/user.conf`, `fish/user.fish`, and anything
-  else you added are left alone. The per-machine generated drop-ins
-  (`hypr/monitors.lua` from `ryoku-monitor`, `hypr/gpu.lua` from `ryoku-gpu`) are
-  seeded only when absent and never clobbered or pruned, so an update refreshes
-  the shipped config without ever resetting your display layout, GPU pin, or any
-  setting. See [Customize](/docs/customize).
-</Info>
-
-The base dir is `/usr/share/ryoku/config`, shipped by `ryoku-desktop`. This is
-the packaged-install replacement for a checkout's config copy: it is run for you
-by `ryoku update` and by the installer's deploy step, not usually by hand.
-
-<Warning>
-  On a dev checkout `ryoku materialize` fails (`base config dir not found:
-  /usr/share/ryoku/config`) because that path only exists once the package is
-  installed. Use `ryoku deploy` there instead, or point `RYOKU_CONFIG_BASE` at a
-  base tree yourself.
-</Warning>
+`ryoku materialize` lays Ryoku's base config into `~/.config` and then overlays
+your edits from `~/.config/ryoku/user_edits`, so a file there wins at its
+mirrored path. It clobbers the previous Ryoku copy, prunes files a past release
+shipped but this one dropped, and never touches files Ryoku never shipped. The
+generated display and GPU drop-ins are seeded only when absent. `ryoku update`
+and the installer run it for you; on a source checkout use the deploy instead.
 
 ## Emergency: `ryoku recovery`
 
-The last resort when the desktop is too broken to update normally (a corrupt
-local config, a broken local build). It resets the checkout to `main` and
-redeploys, **overwriting configs**.
-
-```bash
-ryoku recovery
-```
-
-It hands off to `bin/ryoku-recovery`, preferring the copy in a local checkout and
-otherwise fetching the canonical script from the repo over the network, so it
-still works when the local build is broken. See
-[Troubleshoot](/docs/troubleshoot) for when to reach for it.
-
-## Developer command: `ryoku deploy`
-
-The dev loop, never used on production installs. It builds the Go binaries and
-the QML plugin and lays the repo into `~/.config` from a checkout by running
-`ryoku/shell/deploy.sh`. It requires `RYOKU_REPO` to point at the checkout and
-errors otherwise. The deploy also records the checkout root and the deployed
-commit under `~/.local/state/ryoku/`, which is what lets `status` and `update`
-track the git channel afterwards.
+The last resort when the desktop is too broken to update normally. It always
+restores the stable channel: it pulls `main`, reinstalls the base packages and
+redeploys, **overwriting Ryoku's configs**. It prefers a local copy of
+`bin/ryoku-recovery` and otherwise fetches the canonical script, so it still
+works when the local build is broken. See [Troubleshoot](/docs/troubleshoot).
 
 ## Environment and state
 
-Overrides, mostly for `deploy` and tests:
-
 | Variable | What it does |
 | --- | --- |
-| `RYOKU_REPO` | The checkout root. Required by `deploy`; also lets `status`, `update`, and `recovery` find the repo explicitly. |
+| `RYOKU_REPO` | The checkout root, for `deploy` and a source checkout. |
 | `RYOKU_CONFIG_BASE` | Overrides the `materialize` base dir (default `/usr/share/ryoku/config`). |
-| `RYOKU_CHANNEL` | Overrides the update-channel branch (default `main`; used by tests). |
-
-AI reasoning for `doctor --explain` (opt-in; the report is sent only when a key
-is set). Any OpenAI-compatible endpoint works:
-
-| Variable | What it does |
-| --- | --- |
-| `RYOKU_AI_KEY` | Your provider key, or write it to `~/.config/ryoku/ai-key`. |
+| `RYOKU_AI_KEY` | Your provider key for `doctor --explain`, or write it to `~/.config/ryoku/ai-key`. |
 | `RYOKU_AI_URL` | The API base (default `https://api.groq.com/openai/v1`; for OpenRouter use `https://openrouter.ai/api/v1`). |
-| `RYOKU_AI_MODEL` | The model (Groq default `llama-3.3-70b-versatile`; an OpenRouter free model is e.g. `meta-llama/llama-3.3-70b-instruct:free`). |
+| `RYOKU_AI_MODEL` | The model (Groq default `llama-3.3-70b-versatile`). |
 
-State the CLI keeps under `$XDG_STATE_HOME/ryoku` (default `~/.local/state/ryoku`):
+State lives under `$XDG_STATE_HOME/ryoku` (default `~/.local/state/ryoku`):
 
 | File | What it is |
 | --- | --- |
-| `repo` | The checkout root the last deploy recorded. |
-| `deployed` | The commit the last deploy laid down; the baseline `status` measures the channel against. |
 | `materialized` | The manifest of Ryoku-owned files, so the next `materialize` can prune cleanly. |
-| `doctor-report.txt` | The latest diagnostic report `doctor` wrote (also the default target of `--report`). |
-
-At runtime, `$XDG_RUNTIME_DIR/ryoku-update.json` is the update island's progress
-file, written by `update`.
+| `update-log.txt` | Everything the last update's tools printed. |
+| `doctor-report.txt` | The latest diagnostic report. |
+| `repo`, `deployed` | The checkout and commit the last deploy laid down (source checkouts). |
 
 ## See also
 
 <CardGroup cols={2}>
   <Card title="Updates" icon="arrows-rotate" href="/docs/updates">
-    The snapshot model, the channel, and what a safe update guarantees.
+    The two lanes, channels, snapshots and rollback.
   </Card>
   <Card title="Troubleshoot" icon="stethoscope" href="/docs/troubleshoot">
-    Logs, `ryoku doctor`, rollback, and recovery when something breaks.
+    Logs, `ryoku doctor`, rollback and recovery when something breaks.
   </Card>
   <Card title="Customize" icon="file-pen" href="/docs/customize">
     The override files `materialize` never touches.

@@ -5,27 +5,24 @@ icon: circle-question
 ---
 
 Quick answers to the things people ask first. Each one links to the page that
-covers it in full — start here, then follow the link when you want the detail.
+covers it in full: start here, then follow the link when you want the detail.
 
 <AccordionGroup>
   <Accordion title="How does Ryoku compare to Omarchy? Is it an Omarchy alternative?">
-    Yes, Ryoku is an Omarchy alternative built on the same foundation: an
-    opinionated, keyboard-driven, pre-riced Arch Linux and Hyprland desktop that
-    works on day one, and it grew from that lineage. What differs is what Ryoku
-    ships on top — its own Quickshell UI, the Ryoku Settings (Hub) control
-    center, a plugin and Extras catalogue, and a reproducible single-source
-    system driven by the `ryoku` CLI (`update`, `rollback`, `doctor`). If you
-    like the Omarchy idea, Ryoku is a close, actively developed alternative. See
-    [Omarchy heritage](/docs/omarchy-heritage).
+    Yes, Ryoku is an Omarchy alternative from the same lineage: an opinionated,
+    keyboard-driven desktop that works on day one. What differs is what Ryoku
+    ships on top: its own Quickshell UI on Hyprland or niri, Ryoku Settings,
+    Ryostore and a plugin host, four editions (Arch, CachyOS, Void, Fedora),
+    and a single-source system driven by the `ryoku` CLI (`update`,
+    `rollback`, `doctor`). See [Omarchy heritage](/docs/omarchy-heritage).
   </Accordion>
   <Accordion title="How do I update Ryoku?">
-    Run `ryoku update`. One command takes a snapshot, brings the system current
-    from the signed `[ryoku]` repo, re-lays the base config with
-    `ryoku materialize`, and reloads the shell. There is a single channel
-    (`main`) — no channel switching and no git-pull update. You can also start a
-    run from **Ryoku Settings > Updates** or the update island in the bar. See
-    [CLI](/docs/cli) for the command reference and [Updates](/docs/updates) for
-    the full model.
+    Run `ryoku update`, or press **Update now** in **Ryoku Settings > Updates**.
+    It takes a snapshot, brings the system current from the signed Ryoku
+    repository, re-lays the base config with `ryoku materialize`, and reloads
+    the shell. Stable boxes follow releases; `ryoku track unstable` follows the
+    testing channel and `ryoku track stable` goes back. See [CLI](/docs/cli) for
+    the command reference and [Updates](/docs/updates) for the full model.
   </Accordion>
   <Accordion title="How do I roll back a bad update?">
     On a btrfs root every `ryoku update` is wrapped in a snapper pre/post
@@ -45,30 +42,34 @@ covers it in full — start here, then follow the link when you want the detail.
     [Customize](/docs/customize).
   </Accordion>
   <Accordion title="How do I change the theme or wallpaper?">
-    Pick a theme in **Ryoku Settings > Appearance** — Ryoku ships fifteen. For
-    wallpapers, press `Mod + W` to open the wallpaper and theme menu (Ryowalls
-    browses wallhaven from there), or `Mod + Shift + W` to cycle a random one. By
-    default the color palette follows the wallpaper (via matugen); some themes
-    lock to a fixed palette instead. See [Theming](/docs/theming).
+    Pick a color scheme in the wallpaper picker's settings (`Mod + W`, then
+    `Shift + S`, **Theme**), or apply a rice (Default and NOC ship with Ryoku)
+    from the picker's **Rices** tab. `Ctrl + D` inside the picker downloads
+    wallpapers, and `Mod + Shift + W` sets a random one. By default the palette
+    follows the wallpaper. See [Theming](/docs/theming).
   </Accordion>
   <Accordion title="How do I install more software, like a game launcher?">
-    Open **Ryoku Settings > Store** and install an Extras bundle — the Gaming
-    bundle brings Wine/Proton, launchers, overlays, and a Wayland-friendly
-    Discord. From a terminal it is `ryoku-extras-install install bundle gaming`.
-    You can still use pacman, the AUR, and Flatpak directly for anything not in a
-    bundle. See [Extras](/docs/extras).
+    Open Ryostore from the launcher (or **Browse RyoStore** on the Add-ons page
+    of Ryoku Settings) and install a bundle; the Gaming bundle brings Wine and
+    Proton, launchers and overlays. You can still use the distribution's
+    package manager and Flatpak directly, or the launcher's `>install`
+    provider. See [Extras](/docs/extras).
   </Accordion>
   <Accordion title="How do I add a desktop widget?">
-    Desktop widgets are shell plugins. Install one from **Ryoku Settings >
-    Store**, then enable and place it from the **Installed** tab. A desktop
-    widget lives on the wallpaper — left-drag to move it, right-click to lock or
-    hide it, and drag its corner to resize — while a frame popout melts out of a
-    screen edge on hover. See [Plugins](/docs/plugins).
+    Right-click the desktop and pick **Edit desktop**, add a widget, then drag
+    it where you want it. Right-click a widget for its own settings. More
+    widgets install from Ryostore. See [Plugins](/docs/plugins).
   </Accordion>
-  <Accordion title="Is it still Ryoku if I switch to the CachyOS kernel?">
-    Yes. Ryoku is the desktop, not the kernel. The CachyOS kernel is an opt-in
-    Extras bundle; installing it leaves the stock Arch kernel in place as a
-    fallback, so you can always boot back or remove the bundle. See
+  <Accordion title="Can I leave apps out when I install?">
+    Yes. The installers ask for the browser, login shell, file manager and
+    Rashin, and list every optional app (Ryotunes, Ryoport, RyoManager, the
+    terminal tools and more) so you can untick what you do not want. Whatever
+    you leave out stays out after updates. See [Install Ryoku](/docs/install).
+  </Accordion>
+  <Accordion title="Is it still Ryoku if I add the CachyOS kernel?">
+    Yes. Ryoku is the desktop, not the kernel. On Arch, the installer's CachyOS
+    layer and the Ryostore **CachyOS Layer** bundle add the CachyOS kernel and
+    tuning while the stock Arch kernel stays as a fallback. See
     [Kernels](/docs/kernels).
   </Accordion>
   <Accordion title="How do I switch keyboard layout or fix my input devices?">
@@ -92,26 +93,27 @@ covers it in full — start here, then follow the link when you want the detail.
     generated `monitors.lua`/`gpu.lua` that `ryoku doctor` repairs. The full
     checklist is in [Troubleshoot](/docs/troubleshoot).
   </Accordion>
-  <Accordion title="Can I convert my existing Arch install instead of reinstalling?">
-    Yes. The shell installer scans your machine, shows you the toggles it will
-    apply, backs up every config it touches (with a `restore.sh`), adds the
-    `[ryoku]` repo, installs the Ryoku packages, and materializes the config. It
-    is fully reversible with `ryoku-shell-install --uninstall`. See
-    [Convert](/docs/convert).
+  <Accordion title="Can I convert my existing install instead of reinstalling?">
+    Yes, on Arch, CachyOS, Void and Fedora. The script installer scans your
+    machine, shows the same choices as the ISO plus its migration toggles,
+    backs up every config it touches (with a `restore.sh`), adds the signed
+    repository, installs the Ryoku packages and materializes the config. It is
+    reversible with `--uninstall`. See [Convert](/docs/convert).
   </Accordion>
   <Accordion title="Can I dual-boot Ryoku alongside Windows?">
     Yes, on a single disk or a dedicated one. Ryoku reuses your existing EFI
-    partition and installs into unallocated free space — it never resizes
-    Windows, so you shrink the Windows partition first (Windows Disk Management)
-    to make room, then pick **Install alongside Windows** in the installer. If
-    the **Disk layout** step will not let you press Tab, there is no free space
-    or no EFI partition yet. Full steps: [Dual-boot with Windows](/docs/dual-boot).
+    partition and installs into unallocated free space. It never resizes
+    Windows, so you shrink the Windows partition first (Windows Disk
+    Management) to make room, then pick **Install alongside Windows** in the
+    installer. If the **Disk layout** step will not let you press Tab, there is
+    no free space or no EFI partition yet. Full steps:
+    [Dual-boot with Windows](/docs/dual-boot).
   </Accordion>
   <Accordion title="Does Rashin send my data anywhere?">
-    No. Rashin is optional and off by default; when you do enable it, the daemon
-    binds `127.0.0.1` only and nothing leaves the machine. The knowledge vault is
-    plain markdown on your disk, and you bring your own model provider through
-    Hermes. See [Rashin](/docs/rashin) and [Security](/docs/security).
+    No. The Rashin daemon binds `127.0.0.1` only and its knowledge vault is
+    plain markdown on your disk. Questions go to the model provider you choose
+    in Hermes, nothing else. You can leave Rashin out in the installer or turn
+    it off later. See [Rashin](/docs/rashin) and [Security](/docs/security).
   </Accordion>
   <Accordion title="How do I verify my ISO download?">
     Import the release key, confirm its fingerprint, then `gpg --verify` the ISO

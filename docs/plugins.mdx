@@ -1,6 +1,6 @@
 ---
 title: Plugins
-description: Shell plugins are small desktop widgets and frame popouts; you write the logic and one view, and Ryoku owns their look, motion, sizing, and placement.
+description: Shell plugins are small desktop widgets, frame popouts, bar glyphs and sidebar cards; you write the logic and one view, and Ryoku owns their look, motion, sizing, and placement.
 icon: puzzle-piece
 ---
 
@@ -13,14 +13,14 @@ because the shell draws the surface around it.
 
 <Note>
   Plugins are **widgets**, not applications. To install real software (game
-  launchers, dev stacks, security tools), use [Extras](/docs/extras) bundles, a
+  launchers, dev stacks, VPN clients), use [Extras](/docs/extras) bundles, a
   separate system.
 </Note>
 
-## The three hosts
+## The hosts
 
 When you enable a plugin you pick **one** host for it. The same widget can run in
-any of them; Ryoku just renders it differently.
+any host its manifest declares; Ryoku just renders it differently.
 
 <Tabs>
   <Tab title="Desktop widget">
@@ -34,7 +34,8 @@ any of them; Ryoku just renders it differently.
     - It rides on a card (rounded, translucent, soft shadow) that matches the
       clock and calendar.
 
-    You arrange desktop widgets directly on the wallpaper, not from Settings.
+    You arrange desktop widgets directly on the wallpaper; right-click it and
+    choose **Edit desktop** to add them.
   </Tab>
   <Tab title="Frame popout">
     A panel that melts out of the [frame](/docs/tour) border on hover, fused into
@@ -61,27 +62,32 @@ any of them; Ryoku just renders it differently.
     A plugin can take this host when its `manifest.json` lists `topbarGlyph`
     among its `hosts`.
   </Tab>
+  <Tab title="Sidebar card">
+    A card in the **Extensions** section of the quick settings panel
+    (`Mod + Escape`). Ryoku gives it its width, its place in the list and its
+    motion; the plugin only draws the content.
+  </Tab>
 </Tabs>
 
 <Note>
   Island and window hosts are planned but not built yet. Today a plugin declares
-  `desktopWidget`, `framePopout`, `topbarGlyph`, or a mix.
+  `desktopWidget`, `framePopout`, `topbarGlyph`, `sidebarCard`, or a mix.
 </Note>
 
 ## Install, enable, place
 
 <Steps>
-  <Step title="Install from the Store">
-    Press `Mod + ,` for Ryoku Settings and open **Store** (under **Add-ons**). It
-    opens on a grid of plugin cards with live previews; open one and choose
+  <Step title="Install from Ryostore">
+    Open **Ryostore** from the launcher (or **Browse RyoStore** on the Add-ons
+    page of Ryoku Settings) and go to **Plugins**. Open a plugin and choose
     **Install**. The source downloads to `~/.local/share/ryoku/plugins/<id>/`.
   </Step>
   <Step title="Enable it">
-    Switch to **Installed** (also under **Add-ons**) and toggle the plugin
-    **Enabled**.
+    Open the **Add-ons** page in Ryoku Settings (`Mod + ,`) and turn the plugin
+    on. Some plugins turn themselves on as a desktop widget when installed.
   </Step>
   <Step title="Pick a host and place it">
-    In the same panel choose the host. For a **frame popout**, set the edge and
+    On the same page choose the host. For a **frame popout**, set the edge and
     alignment there. A **desktop widget** appears on the wallpaper, where you
     drag, corner-resize, lock, or hide it directly.
   </Step>
@@ -89,8 +95,8 @@ any of them; Ryoku just renders it differently.
 
 Placement and settings persist to `~/.config/ryoku/plugins.json`. The shell
 watches that file and retunes every surface **live**, no reload, no restart.
-Removing a plugin (from **Installed**) deletes its files but keeps your
-placement, so reinstalling drops it back where you had it.
+Removing a plugin deletes its files but keeps your placement, so reinstalling
+drops it back where you had it.
 
 ## Bar widgets from the community
 
@@ -119,7 +125,7 @@ run:
 ryoku plugin add <git-url|dir> --bar
 ```
 
-Either way Ryoku validates the plugin, installs it through the Store's
+Either way Ryoku validates the plugin, installs it through Ryostore's
 transaction (a receipt and a content-hashed copy), places it on the bar, and the
 shell picks it up within seconds, no restart. Remove it with the **REMOVE**
 button or:
@@ -140,7 +146,7 @@ ryoku plugin export <id>
 That writes `~/Documents/ryoku-plugins/<id>/` (or `~/ryoku-plugins/<id>` if you
 have no Documents directory) and puts it under git. Inside are the plugin's files
 plus two Ryostore descriptors: `product-manifest.json` (the per-file checksums
-the Store verifies against) and `registry-entry.json` (the catalogue entry,
+Ryostore verifies against) and `registry-entry.json` (the catalogue entry,
 marked `official: false`).
 
 When you are ready to publish, run:
@@ -167,9 +173,9 @@ describe the bar widget you want and its agent builds it, installs it with
 `ryoku plugin add`, and drops it into **Community** for you to review. See
 [Asking for a widget](/docs/rashin#asking-for-a-widget).
 
-## Example plugins
+## The catalogue
 
-Ryoku ships two official plugins in the catalogue, both desktop widgets:
+Ryostore carries more than fifty plugins, among them:
 
 <CardGroup cols={2}>
   <Card title="Market" icon="chart-line">
@@ -179,27 +185,36 @@ Ryoku ships two official plugins in the catalogue, both desktop widgets:
   </Card>
   <Card title="Photo Frame" icon="image">
     Pin any photo to your wallpaper in a chosen style (rounded, square, polaroid,
-    framed, or film) with a tunable drop shadow and colour filters. Ships with a
-    sample photo so it looks right the moment you enable it.
+    framed, or film) with a tunable drop shadow and colour filters.
+  </Card>
+  <Card title="MJ widgets" icon="grip">
+    Clock, calendar, weather, media, notes, to-dos, system resources and more,
+    ported from end4's illogical-impulse. The **MJ Widget Set** bundle installs
+    all 25 at once.
+  </Card>
+  <Card title="Nothing widgets" icon="circle-dot">
+    An analog clock, audio, media, screen time and a dashboard in the Nothing
+    style.
   </Card>
 </CardGroup>
 
 Each plugin's own options (Market's symbol and face, Photo Frame's style and
-filter) live in its settings, edited from **Installed** or the desktop widget's
-right-click menu.
+filter) live in its settings, edited from the Add-ons page or the desktop
+widget's right-click menu.
 
 ## From a terminal
 
-The Hub is the normal path, but the same actions have commands. Ids are the ones
-in the [`ryoku-extras`](https://github.com/neur0map/ryoku-extras) plugin
-catalogue (`market`, `photo-frame`).
+Ryostore and the Add-ons page are the normal path, but the same actions have
+commands. Ids are the ones in the
+[`ryostore`](https://github.com/Ryoku-dev/ryostore) catalogue (`market`,
+`photo-frame`).
 
 ```bash
 # Install a plugin from the catalogue (fetches into ~/.local/share/ryoku/plugins).
-ryoku-hub extras plugin market
+ryostore install plugins market
 
 # Remove a plugin's files (your placement in plugins.json is kept).
-ryoku-hub extras pluginremove market
+ryostore remove plugins market
 
 # Enable it and place it as a desktop widget (writes plugins.json; retunes live).
 ryoku-plugins-place market enabled true
@@ -249,8 +264,8 @@ motion automatically.
 The full authoring guide, the manifest schema, the three densities (`glyph`,
 `compact`, `full`), and the settings schema live in the repo:
 
-- [`docs/plugins.md`](https://github.com/ryoku-dev/ryoku-arch/blob/main/docs/plugins.md) in `ryoku-arch`, the canonical guide.
-- [`plugins/AUTHORING.md`](https://github.com/neur0map/ryoku-extras/blob/main/plugins/AUTHORING.md) in `ryoku-extras`, alongside a `template/` plugin to copy.
+- [`docs/plugins.md`](https://github.com/Ryoku-dev/ryoku/blob/main/docs/plugins.md) in the Ryoku repo, the canonical guide.
+- [`plugins/AUTHORING.md`](https://github.com/Ryoku-dev/ryostore/blob/main/plugins/AUTHORING.md) in `ryostore`, alongside a `template/` plugin to copy.
 
 ## Make one
 
@@ -318,7 +333,7 @@ runs the same check on anything submitted:
   and its README says what it runs, reads, writes, and asks for.
 
 The full rule list, with the exact wording the validator uses, is in the
-[authoring guide](https://github.com/ryoku-dev/ryoku-arch/blob/main/docs/plugins.md).
+[authoring guide](https://github.com/Ryoku-dev/ryoku/blob/main/docs/plugins.md).
 
 ## A bar panel
 
@@ -340,6 +355,6 @@ button that asks for your password once.
     Software bundles, the other half of how Ryoku grows beyond its core.
   </Card>
   <Card title="Ryoku Settings" icon="sliders" href="/docs/settings">
-    The Store and Installed panels, and everything else the Hub tunes.
+    The Add-ons page, and everything else the Hub tunes.
   </Card>
 </CardGroup>

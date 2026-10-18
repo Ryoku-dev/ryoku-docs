@@ -4,43 +4,44 @@ description: The Ryoku shell surfaces you meet on the desktop, and where the des
 icon: binoculars
 ---
 
-Ryoku's desktop is Hyprland + the Ryoku shell. Hyprland composites, handles
-input, and tiles windows; the Ryoku shell — a Quickshell (QML) frontend driven
-by the `ryoku-shell` Go daemon — paints everything else: the frame, the bar,
-the launcher, the overview, the screenshot tool, and the desktop widgets.
+Ryoku's desktop is a window manager plus the Ryoku shell. The window manager
+(Hyprland or niri, picked in the installer) composites, handles input and
+tiles windows. The Ryoku shell, a Quickshell (QML) frontend driven by the
+`ryoku-shell` Go daemon, paints everything else: the frame, the bar, the
+launcher, the overview, the capture tool and the desktop widgets. It looks and
+works the same on either window manager.
 
-This page is a map of those surfaces. For the keyboard workflow — opening,
-focusing, moving, and tiling windows — see [Navigation](/docs/navigation); to
+This page is a map of those surfaces. For the keyboard workflow (opening,
+focusing, moving and tiling windows) see [Navigation](/docs/navigation); to
 configure any of it, see [Settings](/docs/settings).
 
 ## Shell surfaces
 
 - **Frame.** The rounded screen border and the popouts that melt into it.
   Always present; it is the desktop's signature chrome.
-- **Bar.** The top bar and its popouts. **QS Bar**, the default, is a full-width
-  top bar carrying the launcher, workspaces, the clock, media, the tray, and
-  status; **Sumi** is a minimal left rail. Choose and arrange either in Ryoku
-  Settings (Bar Studio). Notifications, the update island, and the GNOME keyring
-  prompt grow from the frame.
-- **Launcher.** The command palette (`Mod + Space`): apps plus quick prefixes —
-  `=` calc, `;` clipboard, `?` web, `/` actions, `@` YouTube Music, and `\` a
-  Rashin ask — over a zero-query rest card with the solar-arc clock and weather.
+- **Bar.** **QS Bar**, the default, is a full-width top bar carrying the
+  launcher, workspaces, the clock, media, the tray and status. Orpheus, Sumi,
+  Kairos, Shima, Python and Nomarchy are the other styles; choose and arrange
+  them in Ryoku Settings (Bar Studio). Notifications, the update island and the
+  keyring prompt grow from the frame.
+- **Launcher.** The command palette (`Mod + Space`): apps, open windows and
+  files, plus quick prefixes: `=` calc, `?` web, `/` actions and file search,
+  `>` install a package, `@` live radio, and `\` a Rashin ask.
+- **Quick settings.** `Mod + Escape` opens the panel with Wi-Fi, power,
+  logout, restart and shutdown, media and system graphs.
+- **Kit.** `Mod + K` shows the keys that open almost everything.
 - **Overview.** The full-screen workspace expo (`Mod + Tab`): scaled
   mini-desktops with live window previews. Click to switch or focus, drag
   windows between workspaces, and step between desktops. The
   [Navigation](/docs/navigation) page covers it in full.
-- **Switcher.** A full-screen most-recently-used window switcher. Day to day you
-  cycle windows through the overview above and directional focus (`Mod + Arrow`);
-  see [Navigation](/docs/navigation).
-- **Ryoshot.** Screenshot capture (full screen, region, or window) and
-  annotation — rectangles, arrows, pen, marker, blur, and text, with undo/redo.
-  `Mod + Shift + S` opens it; shots save as PNG to `~/Pictures/Screenshots`.
-- **Keyring prompt.** The GNOME keyring password prompt, grown from the frame
-  rather than a floating dialog. System-driven — it appears when an app
-  needs your keyring unlocked.
-- **Desktop widgets.** A clock, a calendar, and a music player painted on the wallpaper.
-  Right-click to move or configure; enable and lay them out from
-  [Settings](/docs/settings) → Desktop Widgets.
+- **Clipboard.** `Mod + V` opens the clipboard history.
+- **Capture.** `Mod + Shift + S` opens screenshots and screen recording;
+  `Print` takes a screenshot and `Shift + Print` the whole screen. Shots can be
+  annotated with rectangles, arrows, pen, marker, blur and text.
+- **Visualizer.** `Mod + M` toggles the audio visualizer on the desktop.
+- **Desktop widgets.** Clocks, calendars, media and more, painted on the
+  wallpaper. Right-click the wallpaper and choose **Edit desktop** to add,
+  move and resize them; right-click a widget for its own settings.
 
 The Go daemon (`ryoku-shell`, in `ryoku/shell/ipc/`) is the control plane: it
 supervises the persistent components and decides what is on screen, and the QML
@@ -49,49 +50,46 @@ picking a new wallpaper repaints every surface without restarting anything.
 
 ## Getting around
 
-Nothing is open when you log in — Hyprland is a tiling compositor, so it only
-shows what you launch. Open a window with `Mod + Return`, move focus with
-`Mod + Arrow`, and switch workspaces with `Mod + 1 … 0`.
+Nothing is open when you log in: a tiling window manager only shows what you
+launch. Open a terminal with `Mod + Return`, move focus with `Mod + Arrow`, and
+switch workspaces with `Mod + 1 … 0`.
 
-[Navigation](/docs/navigation) walks the whole workflow — opening, focusing,
-moving, resizing, floating, workspaces, the scratchpad, and multi-monitor.
+[Navigation](/docs/navigation) walks the whole workflow: opening, focusing,
+moving, resizing, floating, workspaces, the scratchpad and multi-monitor.
 [Keybindings](/docs/keybindings) is the exhaustive bind reference.
 
 ## Where things live
 
-| Thing | Path |
-| --- | --- |
-| Hyprland entry point | `~/.config/hypr/hyprland.lua` |
-| Personal Hyprland overrides (loaded last, yours always win) | `~/.config/hypr/user.lua` |
-| Manual monitor pinning | `~/.config/hypr/monitors_user.lua` (see the shipped `monitors_user.lua.example`) |
-| Generated seeds (written once on first run, never clobbered) | `~/.config/hypr/monitors.lua`, `~/.config/hypr/gpu.lua` |
-| What Ryoku Settings writes | `~/.config/hypr/settings.lua` and the shell config |
-| Wallpapers | `~/Pictures/Wallpapers` |
-| Per-app native overrides (left alone by updates) | `~/.config/kitty/user.conf`, `~/.config/fish/user.fish`, etc. |
+| Thing | Hyprland | niri |
+| --- | --- | --- |
+| Entry point | `~/.config/hypr/hyprland.lua` | `~/.config/niri/config.kdl` |
+| Your overrides (loaded last, always win) | `~/.config/hypr/user.lua` | `~/.config/niri/user.kdl` |
+| Manual monitor pinning | `~/.config/hypr/monitors_user.lua` | `~/.config/niri/monitors_user.kdl` |
+| Generated displays and GPU | `monitors.lua`, `gpu.lua` | `monitors.kdl`, `gpu.kdl` |
+| What Ryoku Settings writes | `settings.lua` | `settings.kdl`, `rebinds.kdl` |
 
-The Hyprland load order from `hyprland.lua` is: base modules, then the active
-`theme`, then `settings` (what the Hub writes), then `user` (your overrides,
-which win). [Customize](/docs/customize) covers what to put in each layer, and
-[Settings](/docs/settings) documents the Hub that writes the `settings` layer.
+Your Ryoku Settings changes are kept in `~/.config/ryoku/user_edits`.
+Wallpapers live in `~/Pictures/Wallpapers`, and per-app overrides such as
+`~/.config/kitty/user.conf` and `~/.config/fish/user.fish` are left alone by
+updates. [Customize](/docs/customize) covers what to put in each layer.
 
 ## Logs
 
 ```bash
-# The shell daemon log (refresh it with: ryoku reload)
-tail -f ~/.local/state/ryoku-shell.log
+# The shell daemon's log (Arch, CachyOS and Fedora)
+journalctl --user -u ryoku-shell -f
 
-# Hyprland compositor state
-hyprctl monitors
-hyprctl binds
+# What the window manager reports
+ryoku wm status
 ```
 
-`ryoku-shell` is autostarted by Hyprland at login; `ryoku reload` restarts it
-and rewrites the log above.
+`ryoku-shell` runs as a user service that starts with your session;
+`ryoku reload` restarts it.
 
 ## Next steps
 
 - [Navigation](/docs/navigation): the keyboard workflow for windows and
   workspaces.
-- [Settings](/docs/settings): the Hub — every panel that configures the desktop.
+- [Settings](/docs/settings): the Hub, page by page.
 - [Keybindings](/docs/keybindings): the full shipped reference.
-- [Customize](/docs/customize): wallpapers, themes, and `user.lua` overrides.
+- [Customize](/docs/customize): override files that updates never touch.

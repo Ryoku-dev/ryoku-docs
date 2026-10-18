@@ -1,16 +1,19 @@
 ---
 title: Keybindings
-description: Every shipped Ryoku keybinding, grouped by purpose.
+description: Every shipped Ryoku keybinding, grouped by purpose, the same on Hyprland and niri.
 icon: keyboard
 ---
 
-`Mod` is `Super` (the Windows or Cmd key) on a normal Ryoku install. These are
-the binds shipped by `ryoku/hyprland/modules/binds.lua`.
+`Mod` is `Super` (the Windows or Cmd key). Ryoku ships one list of binds for
+every window manager, so these work the same on Hyprland and niri. Press
+`Mod + K` to open **Kit**, which shows the live list for your machine,
+including your own changes.
 
-To swap a chord for your own, use the Keybinds page in Ryoku Settings
-(`Mod + ,`): it generates `rebinds.lua`, so the shipped chord is simply never
-registered. Brand-new binds of your own go in `~/.config/hypr/user.lua`
-(loaded last, never touched by updates). See [Customize](/docs/customize).
+To swap a chord for your own, use the **Keybinds** page in Ryoku Settings
+(`Mod + ,`). It writes `rebinds.lua` on Hyprland or `rebinds.kdl` on niri, so
+the shipped chord is simply replaced. Brand-new binds of your own can also go in
+`user.lua` or `user.kdl`, which load last and are never touched by updates. See
+[Customize](/docs/customize).
 
 ## The ones to learn first
 
@@ -18,94 +21,127 @@ registered. Brand-new binds of your own go in `~/.config/hypr/user.lua`
 | --- | --- |
 | `Mod + Space` | App launcher. |
 | `Mod + Return` | Terminal. |
-| `Mod + Escape` | Quick settings: connectivity, sound, calendar, power. |
+| `Mod + Escape` | Quick settings: Wi-Fi, power, logout, restart, shutdown. |
 | `Mod + Tab` | Workspace overview: live previews, drag windows between workspaces. |
+| `Mod + K` | Kit: the keys and tools at a glance. |
 | `Mod + ,` | Ryoku Settings. |
-| `Mod + Q` | Close the active window. |
-| `Mod + L` | Lock the session. |
+| `Mod + Q` | Close the focused window. |
+| `Mod + L` | Lock the screen. |
 
 ## Windows
 
 | Binding | Action |
 | --- | --- |
-| `Mod + Q` | Close the active window. |
+| `Mod + Q` | Close the focused window. |
 | `Mod + F` | Toggle fullscreen. |
-| `Mod + A` | Float at 1000 x 660, centred. Press again to tile back. |
-| `Mod + R` | Enter resize mode. Arrows or `hjkl` resize, `Esc` exits. |
-| `Mod + P` | Toggle mirror / extend displays (`ryoku-monitor toggle`). |
+| `Mod + A` | Float the window, or tile it back. |
+| `Mod + Shift + P` | Pin a floating window to every workspace. |
+| `Mod + D` | Maximise: fill the screen width, keeping gaps and the bar. |
+| `Mod + C` | Centre the window on screen. |
+| `Mod + T` | Group the column into tabs, one window showing at a time. |
+| `Mod + R` | Resize mode: arrows or `hjkl` resize, `Esc` exits. |
+| `Mod + Shift + R` | Step the window through its preset heights. |
+| `Alt + Tab` | Switch to the previously focused window. |
 
 ## Focus, move, resize
 
 | Binding | Action |
 | --- | --- |
 | `Mod + Left / Right / Up / Down` | Focus the neighbour in that direction. |
-| `Mod + Shift + Left / Right / Up / Down` | Move the active window. |
-| `Mod + Ctrl + Left / Right / Up / Down` | Resize the active window in 40 px steps (hold to repeat). |
+| `Mod + Home / End` | Jump to the first or last column. |
+| `Mod + Shift + Left / Right / Up / Down` | Move the window. |
+| `Mod + [ / ]` | Merge the window into the column or group on the left or right, or out of its own. |
+| `Mod + Ctrl + Left / Right` | Narrower or wider. |
+| `Mod + Ctrl + Up / Down` | Shorter or taller. |
+| `Mod + Ctrl + R` | Give the window its automatic height back. |
 | `Mod + Left-drag` | Move the window under the cursor. |
 | `Mod + Right-drag` | Resize the window under the cursor. |
 
-Focus is direction-only. `hjkl` is the resize-mode vocabulary, not a focus
-binding, and `Mod + H` belongs to the scratchpad (see Workspaces).
+## Workspaces
+
+A **desktop** is a block of ten workspaces, so every desktop keeps its own
+`1..10`. The number keys always mean "of the current desktop" on the screen
+you are on.
+
+| Binding | Action |
+| --- | --- |
+| `Mod + 1 .. 0` | Focus that workspace (the number pad works too). |
+| `Mod + Alt + 1 .. 0` | Send the window to that workspace and follow it. |
+| `Mod + Shift + 1 .. 0` | Send the window there and stay here. |
+| `Mod + Page Up / Page Down` | Previous or next workspace (`Mod + Scroll` too). |
+| `Mod + Shift + Page Up / Page Down` | Send the window one workspace up or down. |
+| `Mod + Ctrl + Page Up / Page Down` | Swap this workspace with the one above or below. |
+| `Mod + H` | Tuck the window into the scratchpad; press again on it to bring it back. |
+| `Mod + Alt + H` | Show or hide the scratchpad. |
+| `Mod + Tab` | Overview. |
+| `Mod + Alt + Tab` | Overview by desktop: step through blocks of ten workspaces. |
+
+## Displays
+
+| Binding | Action |
+| --- | --- |
+| `Mod + Alt + Arrow` | Focus the screen in that direction. |
+| `Mod + Alt + Shift + Arrow` | Send the window to that screen. |
+| `Mod + Ctrl + Alt + Arrow` | Move the whole workspace to that screen. |
+| `Mod + P` | Cycle displays: internal only, external only, both. |
 
 ## Apps
 
 | Binding | Action |
 | --- | --- |
 | `Mod + Return` | Terminal. |
-| `Mod + E` | File manager. |
+| `Mod + E` | Files. |
 | `Mod + Alt + E` | Yazi, the terminal file manager. |
 | `Mod + B` | Browser. |
 | `Mod + N` | Editor. |
 | `Mod + O` | Notes. |
+| `Mod + J` | Ryotunes; a second press focuses it. |
 
-Each launches your chosen app for that role; pick them on the Default Apps
-page in Ryoku Settings.
+Each launches the app you chose for that role. The installer sets the browser
+and file manager; change any role on the Keybinds page in Ryoku Settings.
 
 ## Shell surfaces and tools
 
 | Binding | Action |
 | --- | --- |
 | `Mod + Space` | App launcher. |
-| `Mod + Escape` | Quick settings menu. |
-| `Mod + L` | Lock the session. |
-| `Mod + W` | Wallpaper and theme menu: scrolling image and live-video belts, a colour filter, and the theme row. |
+| `Alt + Space` | Ask Rashin, the AI chat bar. |
+| `Mod + Alt + Space` | Rashin; a second press focuses it. |
+| `Mod + K` | Kit; press again to close. |
+| `Mod + Escape` | Quick settings. |
+| `Mod + L` | Lock the screen. |
+| `Mod + W` | Wallpaper picker. |
 | `Mod + Shift + W` | Random wallpaper with a random transition. |
-| `Mod + V` | Clipboard history (a quick settings deep link). |
-| `Mod + T` | The Stash. Dragging a file to the right screen edge opens it too; dropping stashes the file. |
-| `Mod + Tab` | Workspace overview. |
-| `Mod + Alt + Tab` | Workspace overview stepping desktops; `Alt + Tab` again inside cycles them. |
-| `Mod + M` | Toggle the desktop audio visualiser. |
-| `Mod + Shift + M` | Raise the visualiser over windows; again to send it back. |
-| `Mod + G` | Ryolayer, the tool overlay: music, EQ, mic, pinned over the desktop. |
-| `Mod + Grave` | Voxtype speech-to-text; tap again to stop. |
+| `Mod + V` | Clipboard history. |
+| `Mod + M` | Toggle the desktop audio visualizer. |
+| `Mod + Shift + M` | Raise the visualizer over windows; again to send it back. |
+| `Mod + Alt + M` | Drag the visualizer into place. |
+| `` Mod + ` `` | Voice typing; tap again to stop. |
 | `Mod + ,` | Ryoku Settings. |
-| `Mod + S` | Quick capture menu (screenshot, no confirmation). |
-| `Mod + Shift + S` | Ryoshot: screenshot with beautify and annotation. |
-| `Mod + Shift + C` | Pick a colour (`hyprpicker`). |
-| `Mod + Shift + V` | Summon ryovm (virtual machines) to the current workspace. |
+| `Mod + Shift + S` | Capture: screenshot and recording. |
+| `Print` | Screenshot. |
+| `Shift + Print` | Screenshot of the whole screen. |
+| `Mod + Shift + C` | Pick a color. |
+| `Mod + Shift + V` | Bring the virtual machine window to this workspace. |
+| `Mod + Shift + A` | Recover audio when sound stops coming back. |
+| `Mod + Shift + Escape` | Pass every shortcut to the focused app until pressed again. |
 
-## Workspaces
-
-A **desktop** is a block of ten workspaces, so every desktop keeps its own
-`1..10` and windows never jump desktops. The number keys always mean "of the
-current desktop", and they drive whichever monitor the mouse is on instead of
-yanking focus to the laptop panel.
-
-| Binding | Action |
-| --- | --- |
-| `Mod + 1 .. 0` | Focus that slot of the current desktop. |
-| `Mod + Alt + 1 .. 0` | Send the active window to that slot, staying here. |
-| `Mod + Scroll` | Previous / next workspace. |
-| `Mod + H` | Toggle the scratchpad (special workspace). |
-| `Mod + Shift + H` | Stash the active window in the scratchpad, floated and centred. |
+The Rashin binds need Rashin installed (see [Rashin](/docs/rashin)).
 
 ## Media and hardware keys
 
-These work everywhere, including on the lockscreen.
-
 | Binding | Action |
 | --- | --- |
-| `XF86AudioRaiseVolume / LowerVolume` | Default output volume in 5% steps (hold to repeat). |
-| `XF86AudioMute` | Toggle mute. |
-| `XF86AudioPlay / Next / Prev` | Media control through `playerctl`. |
-| `XF86MonBrightnessUp / Down` | Screen brightness in 5% steps, laptop backlight and external DDC monitors alike (`ryoku-cmd-brightness`). |
+| `XF86AudioRaiseVolume / LowerVolume` | Volume up or down. |
+| `XF86AudioMute` | Mute. |
+| `XF86AudioMicMute` | Mute the microphone. |
+| `XF86AudioPlay / Next / Prev` | Play or pause, next, previous. |
+| `XF86MonBrightnessUp / Down` | Screen brightness. |
+| `XF86TouchpadToggle / On / Off` | Toggle the touchpad. |
+
+## Window manager differences
+
+The list is shared, but a window manager can only honour what it can do. On
+Hyprland, which has no column model, `Mod + Home / End`, `Mod + Shift + R`,
+`Mod + Ctrl + R`, the workspace swap and `Mod + Shift + Escape` are listed in
+Kit as unavailable, with the reason.

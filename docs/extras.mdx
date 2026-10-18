@@ -1,145 +1,134 @@
 ---
 title: Extras
-description: Add real software to Ryoku's small core through Extras, curated bundles the Hub installs, removes, and reports for you.
+description: Add real software to Ryoku's small core with bundles, curated sets Ryostore installs, removes, and reports for you.
 icon: cubes
 ---
 
 Ryoku keeps its core deliberately small: a terminal, an editor, a browser, a
 file manager, and the shell that ties them together. Everything else, a game
-launcher, a streaming rig, a security lab, a full dev stack, is added on demand
-through **Extras**. An Extra is a **bundle**: a curated set of software
-installed together, so adding a whole workflow is one click instead of an
-afternoon of hunting packages and their drivers.
+launcher, a streaming rig, a full dev stack, is added on demand as a
+**bundle**: a curated set of software installed together, so adding a whole
+workflow is one click instead of an afternoon of hunting packages and their
+drivers.
 
-Extras install *software*. For the small desktop **widgets** you place on the
-wallpaper (a stock ticker, a photo frame), see [Plugins](/docs/plugins), a
-separate system.
+Bundles install *software*. For the small desktop **widgets** you place on the
+wallpaper, see [Plugins](/docs/plugins), a separate system that lives in the
+same store.
 
 ## Install a bundle
 
 <Steps>
-  <Step title="Open the Store">
-    Press `Mod + ,` for Ryoku Settings and open **Store** (under **Add-ons**).
-    The Store browses shell plugins and Extras bundles side by side; each bundle
-    is a card with a description and its live install state.
+  <Step title="Open Ryostore">
+    Open **Ryostore** from the launcher, or press **Browse RyoStore** on the
+    Add-ons page of Ryoku Settings. Bundles sit beside lockscreens, rices, bar
+    styles and plugins; each one shows what it contains and its live install
+    state.
   </Step>
   <Step title="Pick a bundle and install">
-    Open a bundle to see what it contains, then **Install**. Ryoku opens a
-    floating terminal so `sudo` and the AUR helper have a real TTY, and streams
-    progress as each item lands.
+    Open a bundle to see its items, then **Install**. Ryostore opens a floating
+    terminal so `sudo` has a real prompt, and streams progress as each item
+    lands.
   </Step>
   <Step title="Watch it fill in">
-    Items report present or absent state live, so the card updates as the bundle
-    installs. Remove the same way: open the bundle and choose **Remove**.
+    Items report present or absent live, so the bundle updates as it installs.
+    Remove it the same way. Installed bundles are also listed on the Add-ons
+    page, where you can repair or remove them.
   </Step>
 </Steps>
 
-Under the hood the actuator is `ryoku-extras-install`, and `ryoku-hub` fetches
-and caches the catalogue from the
-[`ryoku-extras`](https://github.com/neur0map/ryoku-extras) repo (with an offline
-fallback to the cache). The Hub is the normal way in; the
-[terminal](#from-a-terminal) drives the same actuator.
+The catalogue lives in the
+[`ryostore`](https://github.com/Ryoku-dev/ryostore) repository. Ryostore fetches
+and caches it, and the actuator, `ryostore-install`, only ever reads that cache.
 
 ## The bundles
 
-Eleven bundles ship in the catalogue. Install as many as you like, they layer.
-
-| Bundle | Tagline | What it adds |
-| --- | --- | --- |
-| Gaming | drivers · launchers · chat | Wine and Proton compatibility stack, game launchers, performance overlays, and a Wayland-friendly Discord. |
-| Audiophile | pipewire · tools · control | EasyEffects, patchbays, mixers, and PipeWire inspection. |
-| The Influencer | stream · record · edit | OBS with Wayland capture, video and image editors, and mic cleanup. |
-| Office Worker | docs · mail · meetings | LibreOffice and office suites, PDF read and edit, mail and calendar, and Teams. |
-| SecPulse Basic | starter cyber lab | Nmap, Gobuster, wordlists, and the HTB / TryHackMe starter kit. |
-| SecPulse Advanced | recon · firewall · ops | Nikto, Shodan, the ProjectDiscovery recon suite, masscan, and firewall helpers. |
-| The Ricer | customize · inspect · tweak | Eye-candy apps, theming tools, color pickers, and visual editors. |
-| The Vibecoder | agents · terminals · flow | Claude Code, Codex, Gemini, aider, and the terminal helpers for building with AI. |
-| The Developer | real dev workflows | Zed, the Docker stack, and git and database TUIs. |
-| The Hacker | reversing · forensics | Ghidra, radare2, gdb, Wireshark, volatility, around 25 reversing and forensics tools. |
-| CachyOS Kernel | faster kernel · keeps stock as fallback | The performance-tuned CachyOS kernel; the stock kernel stays as the fallback. See [Kernels](/docs/kernels). |
+| Bundle | What it adds |
+| --- | --- |
+| Gaming | Launchers, Wine and Proton, performance overlays, controller support and console emulators, plus the matching 32-bit GPU drivers. |
+| The Influencer | Recorders, editors, audio and thumbnail tools, and a right-click video toolkit in the file manager. |
+| Developer Essentials | Build basics, Git and GitHub CLI, shell search tools, C/C++ build and debug tools, language runtimes, Docker and VS Code. |
+| Web Browsers | Firefox, Firefox Developer Edition, Chromium, Brave, LibreWolf and Zen Browser. |
+| VPN & Networking | WireGuard, OpenVPN, IPsec/IKEv2, Proton VPN, Mullvad VPN and Cloudflare WARP. |
+| Rice Showcase | Terminal toys for showing off a rice: Matrix rain, bonsai, visualizers, system readouts and ASCII banners. |
+| Ryotunes | The Ryoku-native music player, with MPRIS and live desktop theming. |
+| Ryoku Palette Bridge | Wallpaper colours for Spotify and Vesktop, with optional live theming for Zen. |
+| Ryoku for Zed | Zed follows Ryoku's wallpaper palette. |
+| MJ Widget Set | 25 desktop widgets, ported from end4's illogical-impulse, with live Ryoku theming. |
+| CachyOS Layer | The CachyOS kernel, tuning, sched-ext schedulers, ananicy-cpp and CachyOS Proton. Arch only. |
 
 <Note>
-  The **CachyOS Kernel** bundle is a kernel swap, not an app set. Read
-  [Kernels](/docs/kernels) for the trade-offs, the rollback path, and how it is
-  wired before you install it.
+  The **CachyOS Layer** turns an Arch install into CachyOS, kernel included,
+  and is also offered as a choice in the installer. Read
+  [Kernels](/docs/kernels) for the trade-offs and the rollback path before you
+  add it.
 </Note>
 
 ## What a bundle contains
 
-A bundle is a list of items, each one of three kinds. You never write or see the
-routing, the actuator picks the right path per item.
+A bundle is a list of items. You never write or see the routing; the actuator
+picks the right path per item.
 
 | Kind | What it is | How it installs |
 | --- | --- | --- |
-| **package** | An Arch package name. | Auto-routed at install time: if it resolves with `pacman -Si` it is an official-repo package installed via `ryoku-pkg-add`, otherwise it is built from the AUR via `ryoku-pkg-aur-add`. Packages are batched. |
-| **script** | A small installer from the catalogue's `installers/`, for tools not in pacman or the AUR (Go, pipx, vendor binaries). | Fetched with `ryoku-hub extras installer <name>` and run with `bash`, detected afterwards by a `command -v` check. |
-| **plugin** | A shell [plugin](/docs/plugins), a desktop widget the bundle ships. | Its source is fetched into `~/.local/share/ryoku/plugins/<id>/` (via `ryoku-hub extras plugin`). You then enable and place it from **Settings > Installed**. |
+| **package** | A distribution package. | Installed with your edition's package manager. On Arch, a package that is not in the official repositories is built from the AUR. Packages are batched. |
+| **script** | A small installer from the catalogue's `installers/`, for tools no repository carries. | Run with `bash`, then detected by a `command -v` check. |
+| **plugin** | A shell [plugin](/docs/plugins), such as a desktop widget. | Fetched into `~/.local/share/ryoku/plugins/<id>/`; turn it on and place it from the Add-ons page. |
+| **Nautilus pack** | Right-click actions for Nautilus. | Installed by Ryostore and tracked under `~/.local/share/ryoku/nautilus/`. |
+
+Bundles can declare what they need first: the `multilib` repository (Steam's
+32-bit libraries), the CachyOS repository, or the 32-bit GPU drivers for your
+hardware. The actuator sets those up before it routes any package.
 
 <Warning>
   **script** items are arbitrary installers, so removing a bundle does **not**
-  reverse them; uninstall those tools by hand. **package** items go through
-  `pacman -Rs`, which refuses to drop anything another installed package still
-  needs, so removing a bundle never breaks the rest of the system. Removing a
-  **plugin** item deletes its files but keeps your placement in
-  `~/.config/ryoku/plugins.json`, so reinstalling drops it back where you had it.
+  reverse them; uninstall those tools by hand. Removing **package** items never
+  drops anything another installed package still needs. Removing a **plugin**
+  deletes its files but keeps your placement in `~/.config/ryoku/plugins.json`,
+  so reinstalling drops it back where you had it.
 </Warning>
 
 ## From a terminal
 
-The Hub is the normal entry point, but `ryoku-extras-install` drives everything
-from a shell. Bundle and item ids are the ones in the
-[`ryoku-extras`](https://github.com/neur0map/ryoku-extras) catalogue (for
-example `gaming`, `the-developer`, `cachyos-kernel`).
+`ryostore-install` drives everything from a shell. Bundle and item ids are the
+ones in the catalogue (for example `gaming`, `developer-essentials`,
+`cachyos-layer`).
 
 ```bash
-# See what a bundle has installed vs. what is missing (machine-readable).
-ryoku-extras-install status
-ryoku-extras-install status bundle gaming
+# What a bundle has installed and what is missing, as JSON.
+ryostore-install status
+ryostore-install status bundle gaming
 
 # Install an entire bundle.
-ryoku-extras-install install bundle gaming
+ryostore-install install bundle gaming
 
-# Install or remove a single item from a bundle.
-ryoku-extras-install install item gaming steam
-ryoku-extras-install remove item gaming steam
+# Install or remove a single item.
+ryostore-install install item gaming steam
+ryostore-install remove item gaming steam
 
 # Remove a bundle's package items.
-ryoku-extras-install remove bundle gaming
+ryostore-install remove bundle gaming
 ```
 
-Set `RYOKU_EXTRAS_DRYRUN=1` to print the plan without touching the system:
+Set `RYOSTORE_DRYRUN=1` to print the plan without touching the system:
 
 ```bash
-RYOKU_EXTRAS_DRYRUN=1 ryoku-extras-install install bundle gaming
+RYOSTORE_DRYRUN=1 ryostore-install install bundle gaming
 ```
 
-<Tip>
-  `ryoku-hub` owns the network and the cache. The `ryoku-pkg-*` and installer
-  helpers only read the already-cached catalogue, they never fetch on their own,
-  so a dry run and a real run see exactly the same plan.
-</Tip>
-
-## Notes
-
-- **Multilib is handled for you.** A bundle that needs 32-bit libraries (Steam
-  and the lib32 overlay in **Gaming**, for instance) declares
-  `requires: ["multilib"]`, and the actuator enables the `[multilib]` pacman repo
-  with `ryoku-pkg-multilib` before it routes any package. The **CachyOS Kernel**
-  bundle likewise pulls in the CachyOS repo the same way.
-- **Live per-item status.** The actuator publishes a JSON report per bundle under
-  `$XDG_RUNTIME_DIR/ryoku-extras/<id>.json`; the Hub watches it, so the Store
-  updates in place as a bundle installs or removes.
+The actuator publishes a JSON report per bundle under
+`$XDG_RUNTIME_DIR/ryostore/`, which is how Ryostore and the Add-ons page update
+in place while a bundle installs or removes.
 
 ## See also
 
 <CardGroup cols={2}>
   <Card title="Plugins" icon="puzzle-piece" href="/docs/plugins">
-    Small desktop widgets and frame popouts, a different system from software bundles.
+    Desktop widgets and frame popouts, a different system from software bundles.
   </Card>
   <Card title="Kernels" icon="microchip" href="/docs/kernels">
-    The CachyOS Kernel bundle in depth: trade-offs and rollback.
+    The CachyOS kernel in depth: trade-offs and rollback.
   </Card>
   <Card title="Ryoku Settings" icon="sliders" href="/docs/settings">
-    The Hub's Store and every other panel, opened with `Mod + ,`.
+    The Add-ons page and every other page, opened with `Mod + ,`.
   </Card>
 </CardGroup>

@@ -1,109 +1,122 @@
 ---
 title: Settings
-description: Ryoku Settings (the Hub) — a live control center for the whole desktop, with per-section preview and reset across 21 panels.
+description: Ryoku Settings (the Hub), the control center for the whole desktop, page by page.
 icon: sliders
 ---
 
-Press `Mod + ,` to open **Ryoku Settings** — the Hub, a Qt/QML control center
-(`qs -c hub`) for the entire desktop. Every section previews its changes live and
-can be reset on its own, so you can experiment without committing anything.
+Press `Mod + ,` to open **Ryoku Settings**, the Hub: one window for the whole
+desktop. Most pages apply as you change them; the window manager page applies
+when you press **Save**.
 
-Under the hood the Hub writes `~/.config/hypr/settings.lua` and the shell config,
-then applies them to the running session immediately — no logout, no restart.
-Your personal `~/.config/hypr/user.lua` still loads last and wins, so hand edits
-you make there override what the Hub writes. See [Customize](/docs/customize) for
-that layering.
+The Hub writes your choices through the window manager's own config
+(`settings.lua` on Hyprland, `settings.kdl` on niri) and the shell's settings.
+Your own `user.lua` or `user.kdl` still loads last and wins, so hand edits there
+override what the Hub writes. See [Customize](/docs/customize) for that
+layering.
 
 <Tip>
-  The **Keybinds** panel lists every shortcut live and lets you rebind any of
-  them, and the search box at the top of the nav rail finds any setting across
-  every section.
+  The search box at the top of the rail finds any page or option, so typing
+  "blur" or "night light" jumps straight to it. The **Advanced** switch at the
+  foot of the rail shows the deeper pages and options.
 </Tip>
 
-## The panels
+## One Hub per window manager
 
-The Hub has 21 panels in a left-hand nav rail, grouped by scope. Profile is
-pinned to the top; Updates and Credits to the bottom.
+The Hub only offers what the running window manager can do. Its compositor page
+is named after it (Hyprland, Niri or Wayfire) and holds every setting that
+window manager owns; options it cannot honour are hidden or disabled rather
+than left dead. Keybinds sit outside that group: the same shortcuts work on
+every window manager.
 
-### Profile
+## The pages
 
-| Panel | What it configures |
+### Overview
+
+| Page | What it covers |
 | --- | --- |
-| Profile | Your machine as a collector's specimen — host, CPU, GPU, RAM, and uptime — built to share alongside your rice. |
+| Profile | Your machine at a glance (host, CPU, GPU, memory, uptime) on a plate you can edit and share. |
+| General | Language, regional formats, location, fonts, icon theme and desktop sounds. |
+| Updates | Pending Ryoku updates, waiting distribution packages, your channel and the run log. |
 
-### System
+### Devices
 
-| Panel | What it configures |
+| Page | What it covers |
 | --- | --- |
-| Displays | Detect and arrange monitors: resolution, scale, rotation, mirroring, and saved layout profiles. |
-| Input | Keyboard layout, pointer feel, touchpad behaviour, and key repeat. |
-| Keybinds | Every shortcut, read live from your Hyprland config, plus your own custom binds. |
-| Connections | Wi-Fi networks, Bluetooth devices, and your hotspot, in one place. |
-| GPU | Choose which GPU Ryoku renders on; optional passthrough frees the discrete GPU for a virtual machine (run VMs from `ryovm`). |
+| Displays | Resolution, refresh rate, scale, rotation, arrangement and mirroring, plus night light. |
+| Connections | Wi-Fi, Bluetooth, your hotspot and your phone. |
+| Input | Keyboard layout, mouse and touchpad feel, key repeat and gestures. |
+| Graphics & Power | Which GPU renders the desktop, hybrid and passthrough modes, power profiles and the battery charge limit. |
 
-Displays, Input, and GPU are covered in depth on the
-[Hardware](/docs/hardware) page. Keybinds mirrors the full
-[Keybindings](/docs/keybindings) reference and lets you add or override binds.
+Displays, Input and Graphics & Power are covered in depth on
+[Displays & hardware](/docs/hardware).
 
-<Note>
-  The GPU pin is read once when Hyprland starts, so a change to which GPU renders
-  the desktop takes effect on your **next login** — log out and back in to apply
-  it.
-</Note>
+### Look
+
+| Page | What it covers |
+| --- | --- |
+| Animations | Motion and bezier curves, with a live preview. |
+| Lockscreen | The skin your lock screen wears. It changes the look, never your login. |
+
+Wallpapers, color schemes and rices live in the wallpaper picker (`Mod + W`);
+see [Themes & wallpapers](/docs/theming).
+
+### Compositor
+
+| Page | What it covers |
+| --- | --- |
+| Window manager | How windows look and behave: gaps, borders, rounding, opacity, blur, shadows and layout. Its **Compositor** tab switches window manager. |
+| Plugins | Hyprland plugins such as title bars, glass, focus flash and key sounds. Hyprland only. |
+| Layer Rules | Bars, launchers and other layer surfaces by namespace: blur, shadow and opacity. Advanced. |
 
 ### Desktop
 
-| Panel | What it configures |
+| Page | What it covers |
 | --- | --- |
-| Appearance | Window look: gaps, rounding, borders, opacity, blur, shadows, and the cursor theme. |
-| Animations | Tune Hyprland's animations and edit bezier curves with a live preview. |
-| Lockscreen | Pick the skin your lock screen wears; it only swaps the look, never your login. |
-| Shell | Tune the Ryoku shell: the frame thickness, the bar style, hover reveal, and the shell palette (match the wallpaper or lock a fixed one). |
-| Desktop Widgets | Clock, calendar, and music on the wallpaper: design, size, shape, and placement, with a live preview. |
+| Bar Studio | The bar style, its rails, zones and widgets, and the dock. |
+| Desktop | The brand mark, the reload cover, notifications and the clipboard. |
+| Controls | The quick settings panel on `Mod + Escape`: its sections and their order. |
+| App Launcher | The launcher's home view, greeting and weather. |
 
-Appearance and the Shell palette are the front door to
-[Theming](/docs/theming) — wallpapers, the matugen palette, and the shipped
-themes.
+Desktop widgets, the depth effect and the visualizer are arranged on the
+desktop itself: right-click the wallpaper and choose **Edit desktop**.
 
-### Add-ons
+### Keys & apps
 
-| Panel | What it configures |
+| Page | What it covers |
 | --- | --- |
-| Store | Browse and install shell plugins and Extras bundles. |
-| Installed | Your installed plugins: enable or disable, configure, place, and remove each. |
+| Keybinds | Every shortcut, read live, your own binds, and the apps behind the browser, terminal, editor and files keys. |
+| App Overrides | Per-app opacity, blur and corners. Advanced. |
+| Window Rules | Float, pin, size or place windows by class or title. Advanced. |
 
-Bundles of software live on the [Extras](/docs/extras) page; desktop and
-frame-popout widgets live on [Plugins](/docs/plugins).
+### System
 
-### Advanced
-
-| Panel | What it configures |
+| Page | What it covers |
 | --- | --- |
-| Window Rules | Float, size, pin, or place windows by class or title. |
-| Layer Rules | Tune layer-shell surfaces (bars, launchers) by namespace: blur, dim, no animation. |
-| Autostart | Commands that run when the session starts. |
-| Environment | Environment variables for the Hyprland session. |
-| Performance | Opt-in tweaks that trade a little eye-candy for lower CPU, GPU, and memory use on modest hardware. |
-| Rashin | Configure Rashin, the optional local AI agent — off by default. |
+| Performance | Trade some eye candy for lower CPU, GPU and memory use, or follow the power profile. |
+| Session | Commands that run at login and session environment variables. |
+| Recording | Screen recording quality, frame rate and codec. |
+| Dictation | Voice typing. |
+| Fastfetch | The terminal system readout and its logo. Advanced. |
+| Import config | Bring in your existing dotfiles (kitty, fish, Fastfetch and more), with undo. Advanced. |
 
-Rashin gets its own walkthrough on the [Rashin](/docs/rashin) page.
+### Extend
 
-### Updates and Credits
-
-| Panel | What it configures |
+| Page | What it covers |
 | --- | --- |
-| Updates | Pending updates for your Ryoku system, and your update channel. |
-| Credits | The projects, communities, and testers Ryoku is built on. |
+| Add-ons | Your installed plugins and bundles: turn them on, place them, update or remove them. **Browse RyoStore** opens the store for more. |
+| Rashin | Turn Rashin on or off and set up the Hermes agent. |
 
-Keeping the system current is covered on the [Updates](/docs/updates) page.
+[Rashin](/docs/rashin) has its own walkthrough, and keeping the system current
+is covered on [Updates](/docs/updates). **Credits** sits at the foot of the
+rail.
 
 ## Next
 
 <CardGroup cols={2}>
   <Card title="Customize" icon="wrench" href="/docs/customize">
-    The config layers behind the Hub, and `user.lua` overrides.
+    The config layers behind the Hub, and your own override files.
   </Card>
-  <Card title="Theming" icon="palette" href="/docs/theming">
-    Wallpapers, the matugen palette, and the shipped themes.
+  <Card title="Themes & wallpapers" icon="palette" href="/docs/theming">
+    Wallpapers, color schemes and rices.
   </Card>
 </CardGroup>
