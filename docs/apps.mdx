@@ -1,97 +1,91 @@
 ---
 title: Apps & tools
-description: The curated set of apps, launcher providers, and built-in tools that work the moment you log in.
+description: The apps Ryoku ships, the Ryoku apps you can keep or leave out, the launcher's providers, and the built-in tools.
 icon: toolbox
 ---
 
-Ryoku ships a small, curated toolkit, not a grab bag of everything on the AUR.
-Everything below is installed, wired to a key, and working the moment you log
-in: a terminal, an editor, a browser, two file managers, a media player, and a
-command palette that reaches the rest. Want more software? [Extras](/docs/extras)
-adds whole bundles in one click.
+Ryoku ships a curated toolkit, not a grab bag of everything in the
+repositories. The installer lets you keep or leave out most of it (see
+[Install Ryoku](/docs/install)); whatever you leave out stays out after
+updates. Want more software? Ryostore adds whole bundles in one click.
 
 ## Core apps
 
-Each core app has a launch key. `Mod` is `Super`.
+Each core app has a launch key. `Mod` is `Super`. Terminal, editor, browser and
+files are **roles**: the key opens whichever app the role points at, and you
+can repoint a role in **Ryoku Settings > Keybinds**, where the default apps
+live beside the shortcuts.
 
-| App | Role | Key | Command |
-| --- | --- | --- | --- |
-| Kitty | Terminal | `Mod + Return` | `kitty` |
-| Neovim (LazyVim) | Editor | `Mod + N` | `kitty -e nvim` |
-| Chromium | Browser | `Mod + B` | `chromium` |
-| Nautilus | Files (GUI) | `Mod + E` | `nautilus` |
-| Yazi | Files (terminal) | `Mod + Alt + E` | `kitty -e yazi` |
-| mpv | Media player | — | opens audio/video; also RyoTunes' engine |
+| App | Role | Key |
+| --- | --- | --- |
+| Kitty | Terminal | `Mod + Return` |
+| Neovim (LazyVim) | Editor | `Mod + N` |
+| The browser you picked (Firefox by default) | Browser | `Mod + B` |
+| The file manager you picked (Nautilus by default) | Files | `Mod + E` |
+| Yazi | Files in the terminal | `Mod + Alt + E` |
+| Ryotunes | Music | `Mod + J` |
+| Ryoport | VMs, SSH and serial consoles | `Mod + Shift + V` |
+| RyoManager | System monitor and task manager | the launcher |
 
-Neovim comes set up with a LazyVim configuration. mpv has no launch bind: it
-opens the media you hand it, and it is the audio engine behind
-[RyoTunes](#ryotunes).
+See [Keybindings](/docs/keybindings) for the complete bind list.
 
-See [Keybindings](/docs/keybindings) for the complete, authoritative bind list.
+## The Ryoku apps
+
+Three of Ryoku's own apps are on by default and listed first in the installer.
+Each can be left out there, or removed later; the doctor never puts a removed
+app back.
+
+- **Ryotunes** is the music app. The now-playing widgets and the media keys
+  follow it like any other player. It updates from its own releases.
+- **Ryoport** is the dashboard for virtual machines, SSH hosts and serial
+  consoles. It ships inside the desktop package, so leaving it out in the
+  installer hides its launcher entry instead of removing files.
+- **RyoManager** is the system monitor and task manager: performance graphs
+  and the running processes, which you can inspect and end. It reaches
+  existing installs once through the doctor.
+
+## The file manager
+
+The installer asks for a file manager:
+
+- **Files (Nautilus)** is recommended: Ryoku's stash actions live in its
+  right-click menu.
+- **Dolphin**, KDE's file manager.
+- **Thunar**, Xfce's light file manager.
+
+The one you pick becomes the files role (`Mod + E` and every "open folder"
+action) and the default for folders. Change it later in **Ryoku Settings >
+Keybinds**.
 
 ## The launcher
 
-Press `Mod + Space` to open the launcher, Ryoku's command palette. Start typing
-to search apps, open windows, files, and snippets at once, or lead with a prefix
-to talk to one provider directly.
+Press `Mod + Space` to open the launcher. Start typing to search apps, open
+windows, the web and quick math at once, or lead with a prefix to talk to one
+provider directly. `F1` inside the launcher shows this list.
 
-| Prefix | Provider | What it does |
-| --- | --- | --- |
-| _(none)_ | Apps, files, windows, snippets | Fuzzy search everything at once |
-| `@` | YouTube Music | Search and play free music (see [RyoTunes](#ryotunes)) |
-| `=` | Calculator | qalc: math, units, currency |
-| `/` | Actions | System actions: lock, wallpaper, screenshot, night light, media, settings |
-| `;` | Clipboard | Clipboard history, copy or delete |
-| `?` | Web search | Web search with `!bang` shortcuts and an inline instant answer |
-| `\` | Rashin ask | One question to the local [Rashin](/docs/rashin) agent |
-| `install` / `remove` / `search` | Packages | Install or remove software across every package manager |
+| Prefix | What it does |
+| --- | --- |
+| _(none)_ | Apps, open windows, web results and quick math |
+| `/` | Actions: lock, screenshot, media, settings |
+| `/file`, `/folder`, `/image`, `/video` | Find files |
+| `>` | Packages: `>install`, `>remove`, `>search` |
+| `=` | Calculator |
+| `?` | Web search, with `!bang` shortcuts |
+| `@` | Live radio: `@lofi` tunes in, `@stop` tunes out |
+| `\` | One question to the [Rashin](/docs/rashin) agent |
 
-<Tip>
-Type with no prefix and the launcher fans your query across apps, files, open
-windows, and snippets at once, ranked by score and by how often you launch each
-app.
-</Tip>
-
-The `\` Rashin lane needs the optional Rashin agent enabled; see
-[Rashin](/docs/rashin).
-
-### RyoTunes
-
-RyoTunes is Ryoku's built-in free music, and the launcher is its front door.
-There is no account and no API key, because YouTube Music's public endpoints are
-keyless.
-
-- **Search and play.** Type `@` then a song or artist. Results show real songs
-  (clean title, artist, album, duration, and album art). Pick one and it plays
-  inline.
-- **Endless radio.** Playing a track seeds a ~50-track YouTube Music radio and
-  keeps the queue full, so the music never stops.
-- **Paste a link.** Paste a YouTube or YouTube Music URL (with or without `@`):
-  a bare track seeds its radio, a `?list=` link queues the whole playlist.
-- **Saved playlists.** Played playlists appear as a chip row under the
-  now-playing card and replay instantly with no network round-trip.
-- **Real transport.** `mpv-mpris` publishes the stream as a normal MPRIS player,
-  so the media keys, Next/Prev, shuffle, and the seekbar all work, and playing a
-  YouTube track pauses your other players so audio never stacks.
-
-<Note>
-RyoTunes needs `yt-dlp`, `mpv` (with `mpv-mpris`), and `curl`, all in the base
-set. Signing into a default browser lifts yt-dlp's rate limit. This is streaming
-only; there is no library sync.
-</Note>
+The `\` lane needs Rashin; see [Rashin](/docs/rashin).
 
 ## The desktop music player
 
-The desktop **Music player** widget — one of the wallpaper widgets you can
-enable — follows whichever MPRIS player is active (RyoTunes, Spotify, a browser
-tab, or `mpv`), with artwork, transport, and a seekbar.
+The desktop **Music player** widget follows whichever MPRIS player is active
+(Ryotunes, Spotify, a browser tab or `mpv`), with artwork, transport and a
+seekbar.
 
 For Spotify, its backdrop can play the track's **Spotify Canvas**. The Canvas
 token is only readable inside the Spotify client, so `ryoku doctor` installs
-`spicetify-cli` and wires the bundled `ryoku-canvas` extension for you, and
-Canvas works out of the box. The setup is inert if you do not run Spotify.
-RyoTunes (YouTube Music) stays the default music app; Spotify is a supported
-choice.
+`spicetify-cli` and wires the bundled `ryoku-canvas` extension for you. The
+setup is inert if you do not run Spotify.
 
 ## Screenshots
 
@@ -118,15 +112,15 @@ Press `Mod + Shift + S` to open **Ryoshot**, the screenshot and annotation tool.
 | Voice dictation | `Mod + Grave` | Tap to start Voxtype speech-to-text, tap again to stop |
 | Audio visualizer | `Mod + M` | Toggle the desktop audio spectrum (via `cava`) |
 
-Voice dictation types the transcription straight into the focused app
-(`wtype`). Press `Mod + Shift + M` to raise the visualizer over your windows
-instead of leaving it on the wallpaper. Clipboard history is also reachable in
-the launcher with the `;` prefix.
+Voice dictation types the transcription straight into the focused app. Press
+`Mod + Shift + M` to raise the visualizer over your windows instead of leaving
+it on the wallpaper.
 
 ## Shell and CLI tools
 
-The default login shell is **fish**, with the **Starship** prompt. The terminal
-comes stocked with modern replacements for the classic tools.
+The installer asks for the login shell: Fish (recommended), Zsh with Oh My Zsh,
+or Bash with ble.sh, all with the **Starship** prompt. The **Modern CLI tools**
+and **Git tools** rows in Apps & tools bring most of these:
 
 | Tool | Replaces / does |
 | --- | --- |
@@ -151,13 +145,13 @@ directly.
 | `songrec` | Recognize the music that is playing |
 | `tesseract` | OCR, pull text out of a screenshot |
 | `zbar` | Scan a QR code on screen |
-| `gpu-screen-recorder`, `wf-recorder` | Screen recording (the second is the multi-GPU fallback) |
-| `hyprsunset` | Night light, warm the screen color temperature |
+| `gpu-screen-recorder` | Screen recording |
+| Night light | Warm screen colours, set on **Ryoku Settings > Displays** |
 
 <Tip>
-Need software that isn't here? [Extras](/docs/extras) installs curated bundles
-(gaming, dev, office, security, and more) in one click, and the launcher's
-package provider (`install <name>`) grabs anything from the repos.
+Need software that isn't here? Ryostore installs curated bundles in one click,
+and the launcher's package provider (`>install <name>`) installs anything from
+the repositories.
 </Tip>
 
 Colors follow your wallpaper across every one of these tools; see

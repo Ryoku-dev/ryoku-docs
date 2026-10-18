@@ -1,0 +1,78 @@
+---
+title: "What's new in 1.0"
+description: The installer choices, RyoManager, the shipped rices, Ryogami's new setup and the other changes since the last docs update.
+---
+
+This page covers what changed since these docs were last refreshed for beta 18
+in early September 2026. The per-tree changelogs in the
+[Ryoku repository](https://github.com/Ryoku-dev/ryoku) have every detail.
+
+## Install
+
+- **Pick what you install.** The Arch, CachyOS and Void ISOs and the one-line
+  script installer now ask the same questions: compositor, browser, login
+  shell, file manager, Rashin, and a list of apps and terminal tools. Anything
+  you leave out is recorded, so `ryoku update` never puts it back. See
+  [Install Ryoku](/docs/install) and [Convert a machine](/docs/convert).
+- **A file manager choice.** Nautilus is recommended because Ryoku's stash menu
+  lives in its right-click menu. Dolphin and Thunar are the alternatives, and
+  the one you pick becomes the files role and the folder handler.
+- **The Ryoku apps are listed first.** Ryotunes, Ryoport and RyoManager are on
+  by default and each can be left out.
+- **Rashin is its own question.** The installer says what the agent does and
+  that it runs the Hermes agent, which installs at the first login when the
+  machine is online. On Fedora and Void, Rashin is part of the desktop package.
+- **The CachyOS kernel on Arch.** The Arch ISO and the script installer on an
+  Arch system can add the CachyOS layer: the CachyOS repositories and kernel
+  (the Arch kernel stays as a boot fallback), system tuning, sched-ext
+  schedulers, ananicy-cpp and CachyOS Proton. It needs a network connection and
+  is skipped, without failing the install, when the mirror is unreachable. See
+  [Kernels](/docs/kernels).
+- **Void and Fedora.** Void has its own live ISO and installer (niri only).
+  Fedora 44 and 45 install through the one-line installer.
+
+## Apps
+
+- **RyoManager** is the new system monitor and task manager. It is installed by
+  default on every edition, can be removed, and reaches existing installs once
+  through the doctor without coming back after a removal.
+- **Kit** (`Super + K`) puts the keybinds, every Ryoku command, your phone, dev
+  tools and a typing test behind one search field.
+- **Rashin** has two modes: Ask (`Alt + Space`) for quick answers and Agent for
+  longer work, plus the Rashin window (`Super + Alt + Space`).
+
+## Wallpapers, rices and looks
+
+- **Default and NOC ship as rices**, each with its wallpaper, preview, shell
+  look and Fastfetch style. A fresh login applies Default and keeps its
+  wallpaper.
+- **Ryogami's new starting setup.** Fresh profiles open a wider slices picker
+  with the Ash flip and wobble at 1.2x scale, the rise launch animation, fast
+  filter swaps and 900 ms transitions. Picker styles include slices, depth,
+  hex, wall, sandy, hand, collection and duel.
+- **Images are optimised on arrival.** New PNG, JPEG and GIF wallpapers are
+  re-encoded to WebP and the original goes to Ryogami's trash for a few days.
+  Turn it off in Ryogami under **Settings > Library > Images & recovery**.
+- **Saved rices keep their wallpaper.** Saving a rice after Ryogami optimised
+  the current wallpaper used to drop the wallpaper and the preview. It no
+  longer does, and the picker's rice list refreshes when a rice is saved again.
+- **One wallpaper per workspace** is possible from the picker's This workspace
+  target.
+
+## Desktop
+
+- **Bar styles.** A fresh install shows QS Bar. Orpheus, Sumi, Kairos, Shima,
+  Python and Nomarchy are the others, and each reads the desktop through the
+  same window-manager seam on Hyprland and niri.
+- **Desktop sounds** can be tuned, swapped for your own files or switched off
+  in **Ryoku Settings > General > Sounds**.
+- **Icon themes** are picked in **Ryoku Settings > General** and apply to GTK,
+  Qt, KDE apps and the shell together.
+- **Night light** is on the **Displays** page and can follow the real sun.
+
+## First login
+
+The welcome window walks through the keys that open almost everything, Default
+is applied with its wallpaper, and when Rashin was kept a terminal opens once
+to run the Hermes setup as soon as the machine is online. See
+[First boot](/docs/first-boot).

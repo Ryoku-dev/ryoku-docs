@@ -1,6 +1,6 @@
 # Ryoku documentation
 
-The public documentation for [Ryoku Arch](https://github.com/ryoku-dev/ryoku-arch),
+The public documentation for [Ryoku](https://github.com/Ryoku-dev/ryoku),
 published to https://docs.ryoku.dev with [Mintlify](https://mintlify.com).
 
 ## Structure
@@ -8,7 +8,7 @@ published to https://docs.ryoku.dev with [Mintlify](https://mintlify.com).
 - `docs.json` Mintlify config: theme, brand colors, logos, navigation.
 - `index.mdx` the landing page.
 - `docs/*.mdx` the documentation pages.
-- `assets/brand/` brand logos and the favicon.
+- `assets/brand/` the wordmark and the favicon.
 
 ## Local preview
 
@@ -17,5 +17,7 @@ npm i -g mint
 mint dev
 ```
 
-Changes pushed to the connected branch deploy automatically. Keep the content in
-step with the `ryoku-arch` repository: the desktop is the source of truth.
+Changes pushed to `main` deploy automatically once the Mintlify GitHub app is
+connected to this repository. Keep the content in step with the
+[Ryoku repository](https://github.com/Ryoku-dev/ryoku): the desktop is the
+source of truth.

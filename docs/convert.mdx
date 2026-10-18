@@ -1,184 +1,226 @@
 ---
-title: Convert an existing Arch machine
-description: Turn an existing Arch install into a Ryoku machine with one reversible command.
+title: Convert a machine you already have
+description: Turn an existing Arch, CachyOS, Void or Fedora install into a Ryoku machine with one reversible command.
 icon: right-left
 ---
 
-Already running Arch? You do not need the ISO. One command converts your machine
-into a Ryoku box in place — and the same tool undoes it. Everything it touches is
-backed up first, your desktops and files stay put, and Ryoku is layered on top
-rather than installed over you.
+Already running Linux? You do not need the ISO. One command converts an
+existing Arch, CachyOS, Void (glibc) or Fedora® 44/45 system into Ryoku in
+place, and the same tool undoes it. Everything it touches is backed up first,
+your desktops and files stay put, and Ryoku is layered on top rather than
+installed over you. It never partitions a disk.
 
 <Info>
-Starting from a clean disk or a new machine instead? Boot the signed ISO — see
+Starting from a clean disk or a new machine instead? Boot the signed ISO; see
 [Install Ryoku](/docs/install).
 </Info>
 
+<Warning>
+The script installer rewrites your desktop configuration and is still being
+tested across hardware and setups. Back up first, run the dry run, and prefer a
+machine you can afford to reinstall.
+</Warning>
+
 ## The one-liner
 
-Run this as your **normal user** — not root. The script calls `sudo` only when it
-actually needs elevation.
+Run this as your **normal user**, not root. The script calls `sudo` only when it
+needs elevation.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/ryoku-dev/ryoku-arch/main/ryoku-shell-installer/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/ryoku-dev/ryoku/main/ryoku-shell-installer/install.sh | bash
 ```
 
-`install.sh` is a deliberately dumb bootstrap: it checks the machine is Arch-based
-and `x86_64`, downloads the `ryoku-shell-install` binary, SHA256-verifies it
-against a committed checksum, and hands it your terminal. Every real decision
-lives in that interactive installer. Curious about the verification path first?
-See [Verifying downloads](/docs/security).
+`install.sh` is a small bootstrap: it detects the package manager (pacman,
+XBPS, dnf, or apt for the Debian source build), checks for `x86_64`, downloads
+the `ryoku-shell-install` binary, verifies its SHA256 against a committed
+checksum, and hands it your terminal. Every real decision lives in that
+interactive installer. See [Verifying downloads](/docs/security) for the
+verification path.
 
-### Flags and options
+## Choose what you install
 
-To convert interactively, just pipe the script to `bash`. To pass options through
-to the installer, add them after `bash -s --`:
+The plan screen shows the same choices as the ISO installer:
 
-| Flag | What it does |
-| --- | --- |
-| `--dry-run` | Print every command it *would* run and change nothing. |
-| `--yes` | Headless: run the default plan with no prompts. |
-| `--uninstall` | Reverse a previous conversion (see [Reversible](#reversible)). |
+- **Window manager**: Hyprland or niri (Void is niri only; Wayfire is
+  experimental on Arch and CachyOS).
+- **Web browser**: Firefox (recommended), Chromium, Zen on Arch and CachyOS, or
+  none.
+- **Login shell**: Fish (recommended), Zsh or Bash. A supported shell you
+  already use is kept.
+- **File manager**: Files (Nautilus, recommended because Ryoku's stash menu
+  lives in its right-click menu), Dolphin or Thunar. One you already have is
+  kept.
+- **Rashin**: Ryoku's AI agent. It runs the Hermes agent, and the first login
+  opens the Hermes setup unless Hermes is already installed. On Fedora and Void
+  it is part of the desktop package.
+- **Apps**: the Ryoku apps first (Ryotunes, Ryoport, RyoManager), then the
+  terminal tools, media, gaming and service rows. Kitty, Neovim and btop are
+  required because desktop features open them.
+- **CachyOS kernel and tuning**: only on plain Arch. Off by default. After a
+  mirror check it adds the CachyOS repositories and kernel (the Arch kernel
+  stays as a fallback), system tuning, sched-ext schedulers, ananicy-cpp and
+  CachyOS Proton. When the mirror is unreachable or the CPU lacks x86-64-v3 it
+  says so and points at Ryostore instead of failing.
 
-For example, a full dry run that touches nothing:
+The developer toolchain (Go, Node.js, Python tools and mise) stays behind its
+own **Developer toolchain** toggle here, off by default. Packages you leave out
+are recorded in `~/.local/state/ryoku/provisioned` unless you already had them,
+so `ryoku update` and `ryoku doctor` never add them later.
+
+### Flags and variables
+
+Pass options after `bash -s --`:
+
+| Flag | Variable | What it does |
+| --- | --- | --- |
+| `--dry-run` | | Print every command it would run and change nothing. |
+| `--yes` | | Run the plan with no prompts. |
+| `--uninstall` | | Reverse a previous conversion (see [Reversible](#reversible)). |
+| `--compositor <name>` | | Pick the window manager variant the host edition ships. |
+| `--browser <id>` | `RYOKU_BROWSER` | `firefox`, `chromium`, `zen` or `none`. |
+| `--shell <id>` | `RYOKU_LOGIN_SHELL` | `fish`, `zsh` or `bash`. |
+| `--file-manager <id>` | `RYOKU_FILE_MANAGER` | `nautilus`, `dolphin` or `thunar`. |
+| `--rashin=false` | `RYOKU_RASHIN=0` | Leave out Rashin. |
+| `--without <ids>` | `RYOKU_WITHOUT` | Leave out apps by id, for example `ryotunes,ryoport`. |
+| `--cachyos-layer` | `RYOKU_CACHYOS_LAYER=1` | Add the CachyOS layer (plain Arch only). |
+
+For example, an unattended niri install with Dolphin and without Rashin,
+Ryotunes and Ryoport:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/ryoku-dev/ryoku-arch/main/ryoku-shell-installer/install.sh \
+curl -fsSL https://raw.githubusercontent.com/ryoku-dev/ryoku/main/ryoku-shell-installer/install.sh \
+  | bash -s -- --yes --compositor niri --file-manager dolphin --rashin=false --without ryotunes,ryoport
+```
+
+A full dry run that touches nothing:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/ryoku-dev/ryoku/main/ryoku-shell-installer/install.sh \
   | bash -s -- --dry-run
 ```
 
-To fetch the installer and its config payload from a specific git ref instead of
-`main`, set `RYOKU_SHELL_REF`:
+To fetch the installer and its payload from a specific git ref instead of
+`main`, set `RYOKU_SHELL_REF`. The ref also picks the package channel on Fedora
+(`main` uses stable, `unstable-dev` uses testing):
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/ryoku-dev/ryoku-arch/main/ryoku-shell-installer/install.sh \
+curl -fsSL https://raw.githubusercontent.com/ryoku-dev/ryoku/main/ryoku-shell-installer/install.sh \
   | RYOKU_SHELL_REF=<ref> bash
 ```
 
 <Warning>
-Non-systemd systems (Artix and friends) are refused. On Manjaro the installer
-demands a typed acknowledgement and refuses `--yes` unless `RYOKU_ALLOW_MANJARO=1`
-is set — the `[ryoku]` repo tracks Arch current, which Manjaro stable trails. With
-Secure Boot enforcing, the NVIDIA toggle is forced off and locked (Arch kernels
+Choices that are not available on the host edition are refused before `sudo`.
+Zen and the AUR rows (LocalSend, Voxtype) are not available on Void or Fedora.
+Fedora stays on the nouveau NVIDIA driver and refuses rpm-ostree editions. With
+Secure Boot enforcing on Arch, the NVIDIA toggle is forced off (Arch kernels
 reject unsigned DKMS modules); sign with `sbctl` or disable Secure Boot, then
-re-run.
+run it again.
 </Warning>
 
 ## What it does
 
-The installer is a TUI that shares the ISO installer's visual language. It works
-in three acts — scan, review, install — and writes nothing until you confirm.
+The installer is a TUI in the ISO installer's visual language. It scans,
+shows the plan, and writes nothing until you confirm.
 
 <Steps>
-  <Step title="Verify prerequisites">
-    Confirms an Arch-based system (`pacman` present), `x86_64`, `curl`, and a
-    non-root user, then downloads the `ryoku-shell-install` binary and
-    SHA256-verifies it against its committed checksum before running it.
-  </Step>
   <Step title="Scan your machine">
     Detects your GPU and Secure Boot state, the display manager and network
-    stack, installed desktops (GNOME/KDE/Cinnamon/Xfce), rival Quickshell shells
-    (Noctalia, DankMaterialShell, Caelestia, iNiR), known Hyprland rices (ML4W,
-    HyDE, JaKooLit, end-4), conflicting user daemons (dunst, mako, waybar, swww),
-    any plain Hyprland/niri/sway to migrate from, an Omarchy install to retire,
-    your keyboard layout and btrfs — plus an interrupted previous run to resume.
+    stack, installed desktops, rival Quickshell shells, known rices,
+    conflicting user daemons, any plain Hyprland, niri or sway setup to migrate
+    from, an Omarchy install to retire, your keyboard and monitor layout, and
+    an interrupted previous run to resume.
   </Step>
   <Step title="Review the plan">
-    Every decision is a toggle you approve before anything runs: NVIDIA
-    proprietary drivers, switch the login screen to SDDM, point it at the Ryoku
-    greeter, switch to NetworkManager, remove rival shells, disable conflicting
-    daemons, retire an Omarchy repo, carry over your monitor and keyboard layout,
-    AUR extras, a developer toolchain, and fish as your login shell. Nothing is
-    forced; the list groups under section headers once it gets long.
+    The choices above, then the migration toggles: NVIDIA drivers, switch the
+    login screen to SDDM with the Ryoku greeter, NetworkManager, remove rival
+    shells, disable conflicting daemons, retire an Omarchy repo, carry over
+    your monitor layout, AUR extras and the developer toolchain.
   </Step>
   <Step title="Back up everything it will touch">
     Before the first change, every config the plan touches is copied to
-    `~/.local/state/ryoku/shell-install/backup-<timestamp>/`, alongside a
-    generated `restore.sh`. That script grows a line per saved item, so a kill at
-    any moment still leaves a script that undoes exactly what happened so far.
+    `~/.local/state/ryoku/shell-install/backup-<timestamp>/` with a generated
+    `restore.sh`. The script grows a line per saved item, so a kill at any
+    moment still leaves a script that undoes what happened so far.
   </Step>
-  <Step title="Add the [ryoku] repo and install">
-    Retires any legacy repo, runs `pacman -Syu`, clones the config payload,
-    trusts the `[ryoku]` repository and keyring, removes anything you toggled,
-    installs the Ryoku desktop packages and your GPU drivers, then wires up
-    SDDM, the greeter, and NetworkManager.
+  <Step title="Add the signed repository and install">
+    Trusts the signed Ryoku repository for the host (pacman, XBPS or RPM),
+    installs the desktop, your window manager variant, your file manager, the
+    Ryoku apps and Rashin you kept, and on plain Arch the CachyOS layer when
+    you asked for it. Then it wires up SDDM, the greeter and NetworkManager.
   </Step>
   <Step title="Materialize and self-check">
-    Runs `ryoku materialize` to lay down your `~/.config` (salvaging your monitor
-    and keyboard layout from the old setup), installs any AUR extras, then runs
-    `ryoku doctor` and verifies. Interrupted? Re-run — completed steps are
-    recorded in `~/.local/state/ryoku/shell-install-state.json`, so it resumes
-    from where it stopped and continues the same backup.
+    Lays down `~/.config`, sets the browser and files roles, hides a
+    deselected Ryoport, leaves the first-login notes, runs `ryoku doctor` and
+    verifies. Interrupted? Run it again: completed steps are recorded in
+    `~/.local/state/ryoku/shell-install-state.json`, so it resumes where it
+    stopped.
   </Step>
 </Steps>
 
-When it finishes, reboot to land in the Ryoku greeter and your new session. From
-there it is an ordinary Ryoku box: `ryoku update` keeps it current and
-`ryoku doctor` heals it. Continue with [First boot](/docs/first-boot) for the
-first keys worth pressing.
+When it finishes, reboot into the Ryoku login screen. From there it is an
+ordinary Ryoku machine: `ryoku update` keeps it current and `ryoku doctor`
+heals it. Continue with [First boot](/docs/first-boot).
 
 ## Reversible
 
-The conversion is fully undoable. The reliable way to reverse it is to re-run the
-one-liner with `--uninstall`:
+The conversion can be undone. Run the one-liner again with `--uninstall`:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/ryoku-dev/ryoku-arch/main/ryoku-shell-installer/install.sh \
+curl -fsSL https://raw.githubusercontent.com/ryoku-dev/ryoku/main/ryoku-shell-installer/install.sh \
   | bash -s -- --uninstall
 ```
 
 <Note>
-If the `ryoku-shell-install` binary is still on your `PATH`, `ryoku-shell-install --uninstall`
-does the same thing. The bootstrap above always works because it re-fetches the
-installer for you.
+If the `ryoku-shell-install` binary is still on your `PATH`,
+`ryoku-shell-install --uninstall` does the same thing. The bootstrap above
+always works because it fetches the installer again.
 </Note>
 
-Uninstall walks the exact inverse of the conversion:
+Uninstall walks the conversion backwards:
 
-1. Removes the Ryoku packages in one `pacman -R` transaction (`ryoku-desktop`
-   depends on the rest, so pacman orders the removal itself).
-2. Drops the `[ryoku]` stanza from `/etc/pacman.conf`, keeping the original
-   beside it.
-3. Walks the backup chain **newest to oldest**, running each `restore.sh` with a
-   confirmation prompt — putting every saved config back and re-enabling the
-   services and display manager that run disabled. (Decline one and the walk
-   stops there: the chain only makes sense in order.)
+1. Removes the Ryoku packages in one transaction (`ryoku-desktop` depends on
+   the rest, so the package manager orders the removal).
+2. Drops the Ryoku repository, keeping the original configuration beside it.
+3. Walks the backup chain **newest to oldest**, running each `restore.sh` with
+   a confirmation prompt, which puts every saved config back and re-enables
+   the services and display manager it disabled. Decline one and the walk
+   stops there, because the chain only makes sense in order.
 
-Session packages (SDDM, PipeWire, NetworkManager, …) are left installed — they
-may predate Ryoku, and removing them can lock you out of a login. Your backup
-directories are kept too; delete them once you are sure.
+Session packages (SDDM, PipeWire, NetworkManager and so on) stay installed:
+they may predate Ryoku, and removing them can lock you out of a login. Your
+backup directories are kept too; delete them once you are sure.
 
 <Tip>
-To roll back only the most recent conversion rather than the whole chain, run
-that run's own restore script directly:
-`bash ~/.local/state/ryoku/shell-install/backup-<timestamp>/restore.sh`.
+To roll back only the most recent conversion, run that run's own restore
+script: `bash ~/.local/state/ryoku/shell-install/backup-<timestamp>/restore.sh`.
 </Tip>
 
-## What is touched vs left alone
+## What is touched and what is left alone
 
-The conversion is additive by design. It layers Ryoku on top of your system and
-records how to peel it back off.
-
-| Left alone | Migrated or changed (only with your toggle) |
+| Left alone | Changed only with your toggle |
 | --- | --- |
-| Desktop environments (GNOME, KDE, Cinnamon, Xfce) — never uninstalled, stay selectable at the login screen | Rival Quickshell shells — uninstalled, but only if you toggle it |
-| niri and sway — kept installed as fallback sessions | Conflicting daemons (dunst, mako, waybar, swww) — disabled, never uninstalled |
-| Your files and personal data | The old display manager — disabled (not removed) in favour of SDDM |
-| Session packages on uninstall (SDDM, PipeWire, NetworkManager) | The `[ryoku]` repo and keyring — added, then dropped again on uninstall |
+| Desktop environments (GNOME, KDE, Cinnamon, Xfce) stay installed and selectable at the login screen | Rival Quickshell shells are uninstalled |
+| niri and sway stay installed as fallback sessions | Conflicting daemons are disabled, never uninstalled |
+| Your files and personal data | The old display manager is disabled, not removed, in favour of SDDM |
+| Software you already had, even if you leave it out of the plan | The Ryoku repository and keyring are added, and dropped again on uninstall |
 
-Every config the installer touches is **copied, never deleted** — originals for
+Every config the installer touches is copied, never deleted. Originals of
 system files are kept as `*.pre-ryoku`, and per-run copies live in the backup
-directory with their `restore.sh`. Your monitor layout and keyboard intent are
-salvaged from your existing setup (Hyprland first, then niri, sway, KDE, GNOME,
-finally `localectl`) so your screens and keys come back the way you had them.
+directory with their `restore.sh`. Your monitor layout and keyboard are carried
+over from your existing setup so your screens and keys come back the way you
+had them.
 
 ## Next steps
 
 <CardGroup cols={2}>
   <Card title="Install from the ISO" icon="download" href="/docs/install">
-    Prefer a clean disk? Boot and install the signed Ryoku ISO instead.
+    Prefer a clean disk? Install from the signed ISO instead.
   </Card>
   <Card title="First boot" icon="power" href="/docs/first-boot">
     What you see after login, and the first keys worth pressing.
   </Card>
 </CardGroup>
+
+<sub>Fedora is a registered trademark of Red Hat, Inc., or its subsidiaries in
+the United States and other countries. Ryoku is not affiliated with or endorsed
+by the Fedora Project.</sub>

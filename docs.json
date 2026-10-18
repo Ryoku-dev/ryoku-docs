@@ -2,7 +2,7 @@
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
   "name": "Ryoku",
-  "description": "Ryoku is a hand-built Arch Linux distribution: a cohesive Hyprland desktop, a guided installer, and a reproducible single-source system. An opinionated, pre-riced daily driver and Omarchy alternative on Arch + Hyprland, with the ryoku CLI, wallpaper-driven theming, and an opt-in CachyOS kernel.",
+  "description": "Ryoku is a Linux desktop built on Arch, CachyOS, Void or Fedora: one Quickshell desktop on Hyprland or niri, a guided installer, and signed packages for every edition. A riced daily driver with the ryoku CLI, wallpaper-driven theming and the Rashin agent.",
   "colors": {
     "primary": "#e2342a",
     "light": "#ef5b50",
@@ -38,8 +38,8 @@
     "indexing": "all",
     "metatags": {
       "canonical": "https://docs.ryoku.dev",
-      "description": "Ryoku documentation: install, convert, configure, and run the Ryoku Arch Linux Hyprland desktop, an Omarchy alternative.",
-      "keywords": "Ryoku, Ryoku Linux, Arch Linux, Hyprland, Omarchy, Omarchy alternative, Quickshell, riced Arch desktop, ryoku CLI, CachyOS, Wayland",
+      "description": "Ryoku documentation: install, convert, configure and run the Ryoku desktop on Arch, CachyOS, Void or Fedora with Hyprland or niri.",
+      "keywords": "Ryoku, Ryoku Linux, Arch Linux, CachyOS, Void Linux, Fedora, Hyprland, niri, Quickshell, Omarchy alternative, riced Linux desktop, ryoku CLI, Wayland",
       "og:site_name": "Ryoku Docs",
       "og:title": "Ryoku documentation",
       "og:image": "https://ryoku.dev/social-card.jpg",
@@ -54,13 +54,13 @@
     "links": [
       {
         "label": "GitHub",
-        "href": "https://github.com/ryoku-dev/ryoku-arch"
+        "href": "https://github.com/Ryoku-dev/ryoku"
       }
     ]
   },
   "footer": {
     "socials": {
-      "github": "https://github.com/ryoku-dev/ryoku-arch",
+      "github": "https://github.com/Ryoku-dev/ryoku",
       "website": "https://ryoku.dev"
     }
   },
@@ -73,6 +73,7 @@
             "group": "Get started",
             "pages": [
               "index",
+              "docs/whats-new",
               "docs/install",
               "docs/dual-boot",
               "docs/convert",

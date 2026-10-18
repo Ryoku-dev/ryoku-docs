@@ -1,122 +1,123 @@
 ---
 title: Dual-boot with Windows
-description: Install Ryoku alongside Windows on one disk. Make free space first, then pick "Install alongside" — the installer reuses your EFI partition and never touches Windows.
+description: Install Ryoku alongside Windows on one disk, in free space you made or by letting the installer shrink a partition. Windows keeps booting from the same menu.
 icon: hard-drive
 ---
 
-Ryoku installs alongside Windows on a single disk. The installer **reuses the
-existing EFI partition** and drops Ryoku into **free (unallocated) space** — it
-never resizes, moves, or erases your Windows partition. Because of that, you make
-the room first, then run the installer.
+Ryoku installs alongside Windows on a single disk. Pick **Install alongside**
+at the installer's **Disk strategy** step and Ryoku goes into free
+(unallocated) space. If the disk has none, the installer can shrink one
+partition for you to make room. Your other partitions are kept as they are,
+and the Limine boot menu lists Ryoku and Windows.
 
-<Info>
-  **The one thing that trips people up:** Ryoku does not shrink Windows for you.
-  If Windows fills the whole disk, there is no free space for Ryoku, and the
-  installer's **Disk layout** step will not let you continue (Tab does nothing)
-  until you free some space. Do [Step 1](#step-1%3A-make-room-in-windows) first.
-</Info>
+<Warning>
+Shrinking a partition changes your Windows disk. Back up anything you cannot
+lose before you start, whichever way you make the room.
+</Warning>
 
 ## What you need
 
-Dual-boot alongside Windows requires all of these:
+- **UEFI and GPT.** Boot the Ryoku USB in UEFI mode, not BIOS/CSM/legacy. A
+  UEFI Windows install already uses GPT.
+- **Room for Ryoku:** at least a 20 GiB root plus a 2 GiB boot partition and
+  your swap size. 64 GiB or more is comfortable. The whole disk must be at
+  least 32 GiB.
+- **Windows shut down cleanly.** Turn off Fast Startup in Windows (**Control
+  Panel > Power Options > Choose what the power buttons do**, then untick
+  **Turn on fast startup**) and use **Shut down**, not Restart or Sleep. A
+  hibernated NTFS volume cannot be shrunk safely, and the installer refuses to
+  touch it.
+- **BitLocker:** suspend it in Windows first and keep your recovery key. With
+  BitLocker on, booting Windows from the Ryoku menu asks for the recovery key.
 
-- **UEFI + GPT.** Boot the Ryoku USB in UEFI mode (not BIOS/CSM/legacy). A UEFI
-  Windows install already uses GPT and has an EFI System Partition (ESP).
-- **An existing EFI partition** to reuse — a UEFI Windows install has one.
-- **Enough unallocated free space** for Ryoku: at least **15 GiB for the root**
-  plus **your swap size** (the default swap is 16 GiB, so ~31 GiB; 64 GiB or more
-  is comfortable). Ryoku and the Windows boot manager then share the one ESP.
+No second disk is required. If you would rather keep the two systems fully
+separate, put Ryoku on its own drive and choose **Erase whole disk** there.
 
-No second disk is required. (If you would rather keep the two systems fully
-separate, put Ryoku on a dedicated drive and choose **Erase whole disk** instead.)
+## Step 1: Disable Secure Boot
 
-## Step 1: Make room in Windows
+Reboot into your firmware setup (usually `F2`, `Del` or `F12` at power-on),
+turn **Secure Boot** off, save and exit. See [Install Ryoku](/docs/install) for
+writing the USB.
 
-Do this from **Windows**, before booting the installer.
+## Step 2: Make room, either way
 
-<Steps>
-  <Step title="Turn off Fast Startup and BitLocker">
-    Fast Startup leaves the Windows filesystem in a hibernated state, which can
-    corrupt data when another OS touches the disk. Turn it off: **Control Panel →
-    Power Options → Choose what the power buttons do → uncheck "Turn on fast
-    startup"**. If BitLocker is on, suspend or disable it first (and save your
-    recovery key).
-  </Step>
-  <Step title="Shrink the Windows partition">
-    Press `Win + X` → **Disk Management**. Right-click your Windows (C:) volume →
-    **Shrink Volume**, and shrink it by at least the space Ryoku needs (aim for
-    **64000 MB / 64 GiB** or more). This leaves **Unallocated** space after the
-    Windows partition — that is where Ryoku goes.
-  </Step>
-  <Step title="Fully shut down Windows">
-    Use **Shut down** (not Restart, not Sleep) so the disk is left clean.
-  </Step>
-</Steps>
-
-## Step 2: Disable Secure Boot
-
-Reboot into your firmware setup (usually `F2`, `Del`, or `F12` at power-on) and
-turn **Secure Boot off**. Save and exit. See [Install Ryoku](/docs/install) for
-the full pre-install checklist and how to write the USB.
+<Tabs>
+  <Tab title="Let the installer shrink a partition">
+    Skip ahead to Step 3. When the disk has no free space, the **Disk layout**
+    step lists the partitions it can shrink (NTFS, ext4 and btrfs). Select one
+    and use `←` and `→` to set how much space Ryoku gets. The installer shrinks
+    the filesystem first and the partition second, touches only that one
+    partition, and stops at the first sign of trouble.
+  </Tab>
+  <Tab title="Shrink it yourself in Windows">
+    In Windows press `Win + X`, open **Disk Management**, right-click your
+    Windows (C:) volume and choose **Shrink Volume**. Shrink it by at least the
+    space Ryoku needs (64 GiB is a comfortable amount). The **Unallocated**
+    space that appears after the Windows partition is where Ryoku goes. Then
+    shut Windows down fully.
+  </Tab>
+</Tabs>
 
 ## Step 3: Install alongside Windows
 
-Boot the Ryoku USB in **UEFI mode**. In the installer:
+Boot the Ryoku USB in UEFI mode. In the installer:
 
 <Steps>
   <Step title="Pick the target disk">
     At **Target disk**, choose the disk that holds Windows.
   </Step>
   <Step title="Choose the alongside strategy">
-    At **Disk strategy**, pick **Install alongside Windows** (it is the first,
-    default option). Nothing is written until the final Review step.
+    At **Disk strategy**, pick **Install alongside Windows** (or **Install
+    alongside (keep existing OS)** on a disk with another system). Nothing is
+    written until the final Review step.
   </Step>
-  <Step title="Confirm the layout, then press Tab">
-    The **Disk layout** step shows your disk: the kept Windows and EFI
-    partitions, and a new Ryoku root in the free space. Adjust swap if you like,
-    then press **Tab** to continue to Review. Confirm on Review to install.
+  <Step title="Set the layout, then press Tab">
+    The **Disk layout** step shows the free space Ryoku will use, or the
+    partition it will shrink and by how much. Adjust swap if you like, then
+    press **Tab** to continue to Review. Review states exactly what will be
+    created and kept; confirm there to install.
   </Step>
 </Steps>
 
-Ryoku reuses the existing EFI partition, creates its root in the free region, and
-installs the Limine bootloader with an entry for Windows, so both systems show up
-at boot.
+Ryoku creates its 2 GiB boot partition and root in the free region, installs
+Limine with an entry for Windows, and leaves the Windows partitions as they
+are (apart from the one you chose to shrink).
+
+<Info>
+A second, empty GPT drive with free space and no EFI partition of its own works
+too: the installer offers **Install in the free space**, creates a new EFI
+partition and root there, and leaves every existing partition untouched.
+</Info>
 
 ## "I press Tab and nothing happens"
 
-On the **Disk layout** step, Tab only continues once the alongside layout is
-actually installable. When it is blocked, the screen shows a red `⚠` line with
-the reason. The usual causes:
+On the **Disk layout** step, Tab only continues once the layout is
+installable. When it is blocked, the screen shows a red `⚠` line with the
+reason. The usual causes:
 
 <AccordionGroup>
-  <Accordion title="Not enough free space (the most common one)">
-    Windows is using the whole disk, so there is no room for Ryoku. Go back to
-    [Step 1](#step-1%3A-make-room-in-windows) and shrink the Windows partition to
-    leave at least 15 GiB plus your swap size of unallocated space, then reboot
-    into the installer. (Or press `esc` and choose **Erase whole disk** on a
-    dedicated drive.)
+  <Accordion title="Not enough free space and no partition selected">
+    Select a partition in the list and use `←`/`→` to give Ryoku room, or make
+    room in Windows first (Step 2).
   </Accordion>
-  <Accordion title="No EFI partition to reuse">
-    The installer found no EFI System Partition on the disk. This happens when
-    Windows was installed in **legacy/BIOS (MBR)** mode instead of UEFI, or when
-    you booted the USB in BIOS mode. Reinstall/boot in UEFI mode, or press `esc`
-    and choose **Erase whole disk**.
+  <Accordion title="No partition can be shrunk safely">
+    The reasons are listed under each partition. The usual one is a Windows
+    volume that is hibernated or marked dirty: turn off Fast Startup, run a
+    full shutdown, and try again. BitLocker-locked volumes are not shrunk.
+  </Accordion>
+  <Accordion title="The disk is not GPT, or you booted in BIOS mode">
+    Alongside installs need UEFI and GPT. Boot the USB in UEFI mode, or press
+    `esc` and choose **Erase whole disk** on a dedicated drive.
   </Accordion>
   <Accordion title="The disk is smaller than 32 GiB">
-    Ryoku needs at least 32 GiB total. Pick a larger disk.
+    Ryoku needs at least 32 GiB. Pick a larger disk.
   </Accordion>
 </AccordionGroup>
-
-<Tip>
-  This is expected, not a bug: `Install alongside Windows` is intentionally
-  non-destructive, so it refuses to continue rather than guess where to put
-  Ryoku. Once there is a reusable ESP and enough free space, Tab advances.
-</Tip>
 
 ## After install
 
 The Limine boot menu appears at power-on with entries for **Ryoku** and
-**Windows** — pick whichever you want. If Windows does not appear, boot Ryoku and
+**Windows**; pick whichever you want. If Windows does not appear, boot Ryoku and
 run `ryoku doctor`, then see [Troubleshoot](/docs/troubleshoot).
 
 ## See also
@@ -126,6 +127,6 @@ run `ryoku doctor`, then see [Troubleshoot](/docs/troubleshoot).
     The full install walkthrough, from ISO to first boot.
   </Card>
   <Card title="Troubleshoot" icon="wrench" href="/docs/troubleshoot">
-    Boot, login, and disk recovery when something goes wrong.
+    Boot, login and disk recovery when something goes wrong.
   </Card>
 </CardGroup>

@@ -1,102 +1,79 @@
 ---
 title: First boot
-description: What you see when you log in to Ryoku for the first time, the first-run welcome walkthrough, and the keys worth pressing first.
+description: What happens the first time you log in to Ryoku, the welcome tour, and the keys worth pressing first.
 icon: power-off
 ---
 
-After install, the machine reboots into SDDM. Pick the **Ryoku (Hyprland)**
-session and log in.
+After install, the machine reboots to the Ryoku login screen. Log in with the
+user you created; the session starts the window manager you picked in the
+installer.
+
+## What happens at the first login
+
+- **The Default rice is applied.** Ryoku ships two rices, Default and NOC.
+  Default sets the first look, including its own wallpaper, and the desktop
+  recolours from that wallpaper. NOC is one click away in the rice workshop
+  (see [Themes](/docs/theming)).
+- **The welcome tour opens once.** It walks through the handful of keys that
+  open almost everything and lets you pick the interface scale, the bar and the
+  desktop widgets, previewed live. It shows on a fresh install, after the
+  script installer, and once more when an update reworks it.
+- **The Hermes setup opens when you kept Rashin.** If you answered yes to
+  Rashin in the installer, a terminal opens once the machine is online and runs
+  the Hermes setup: it installs the Hermes agent, connects it and asks you to
+  pick a provider. Offline? It waits for a later login. You can run it again
+  any time from **Set up Hermes agent** on the **Rashin** page of Ryoku
+  Settings, or with `ryoku-rashin setup` in a terminal.
 
 ## What you see
 
 - **The frame.** A rounded screen border, the desktop's signature chrome.
-  Popouts melt into it instead of floating on top.
-- **The bar.** QS Bar, the default top bar: the launcher, workspaces, the
-  clock, the tray, and status live here. You can switch it for Sumi, a slim
-  left rail, from the welcome tour or Ryoku Settings.
-- **The wallpaper, with the desktop widgets you enable — a clock, a calendar,
-  and a music player — painted on it.**
-- **No windows yet.** Hyprland is a tiling compositor, so nothing is open
-  until you open it.
+  Panels grow out of it instead of floating on top.
+- **The bar.** A fresh install shows QS Bar: the launcher, workspaces, the
+  clock, the tray and status. Orpheus, Sumi, Kairos, Shima, Python and
+  Nomarchy are the other styles, in the welcome tour and Ryoku Settings.
+- **The wallpaper** from the Default rice, with the desktop widgets you enable
+  painted on it.
+- **No windows yet.** Hyprland and niri are tiling window managers, so nothing
+  is open until you open it.
 
 `Mod` is `Super` (the Windows or Cmd key on most keyboards).
 
-## The first-run welcome
-
-The first time you log in, a short welcome walkthrough opens over the desktop.
-It shows once — on a fresh ISO install, after the shell installer, and one more
-time when you update into a release that reworks it — so a machine that has
-already seen the current tour is left alone.
-
-<Steps>
-  <Step title="Welcome">
-    A hello and a one-line orientation to the desktop.
-  </Step>
-  <Step title="Keys that matter">
-    The handful of shortcuts that open everything, shown as real keycaps — the
-    same must-know keys listed below.
-  </Step>
-  <Step title="Know your desktop">
-    Where the surfaces live — the bar, the launcher, the frame, and Ryoku
-    Settings — and how to reach each one.
-  </Step>
-  <Step title="Make it yours">
-    The knobs most people want first, previewed live as you change them:
-
-    - **Interface scale** — the fix when everything looks oversized on first boot.
-    - **Bar** — QS Bar, the full top bar, or Sumi, a minimal left rail.
-    - **Desktop widgets** — toggle the Clock, Calendar, and Music player on or off.
-    - **Wallpaper** — shuffle a new one and the whole desktop recolors to match.
-
-    Colours, rounding, and the deeper shell knobs wait in Ryoku Settings.
-  </Step>
-  <Step title="You're set">
-    A send-off that points at Ryoku Settings (`Mod + ,`) for everything else.
-  </Step>
-</Steps>
-
-You can reopen every one of these controls later in **Ryoku Settings**
-(`Mod + ,`).
-
-## Four keys worth pressing first
+## Keys worth pressing first
 
 <CardGroup cols={2}>
   <Card title="Open a terminal" icon="terminal">
-    `Mod + Return` launches `kitty`, the shipped terminal.
+    `Mod + Return` opens the terminal role, kitty unless you changed it.
   </Card>
   <Card title="Open the launcher" icon="search">
-    `Mod + Space` opens the app launcher. Type to filter, Enter to launch.
+    `Mod + Space` opens the launcher. Type to filter, Enter to launch.
   </Card>
   <Card title="Open Ryoku Settings" icon="sliders" href="/docs/settings">
-    `Mod + ,` opens the Hub, the live control center for the whole desktop.
-    See [Settings](/docs/settings).
+    `Mod + ,` opens Ryoku Settings, the control center for the whole desktop.
   </Card>
   <Card title="See every shortcut" icon="keyboard" href="/docs/keybindings">
-    There is no separate legend key. **Ryoku Settings** (`Mod + ,`) lists every
-    shortcut live and lets you rebind any of them, and the
-    [Keybindings](/docs/keybindings) page is the printed reference.
+    `Mod + K` opens Kit: every keybind, every Ryoku command, your phone and
+    dev tools behind one search field.
   </Card>
 </CardGroup>
 
 ## Next steps
 
-- [Navigation](/docs/navigation): the keyboard workflow — open, focus, move,
-  and tile windows across workspaces.
+- [Navigation](/docs/navigation): open, focus, move and tile windows across
+  workspaces.
 - [Desktop tour](/docs/tour): the shell surfaces and where things live.
-- [Keybindings](/docs/keybindings): the full shipped reference, grouped by
-  purpose.
-- [Customize](/docs/customize): wallpapers, themes, and your own
-  `~/.config/hypr/user.lua`.
+- [Keybindings](/docs/keybindings): the shipped reference, grouped by purpose.
+- [Customize](/docs/customize): wallpapers, themes and your own overrides.
 
 ## If nothing draws
 
-If the bar, the launcher, or Ryoku Settings fail to appear, switch to a TTY
+If the bar, the launcher or Ryoku Settings do not appear, switch to a TTY
 (`Ctrl + Alt + F2`), log in, then restart the shell and read its log:
 
 ```bash
 ryoku reload
 tail -n 80 ~/.local/state/ryoku-shell.log
-hyprctl binds
+ryoku doctor
 ```
 
 [Troubleshoot](/docs/troubleshoot) covers the common boot and login issues.

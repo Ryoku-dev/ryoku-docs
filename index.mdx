@@ -1,59 +1,81 @@
 ---
 title: Ryoku
-description: A hand-built Arch Linux Hyprland desktop and Omarchy alternative — a premium, pre-riced workstation with a Quickshell UI, the ryoku CLI, and a signed, reproducible package path.
+description: A hand-built Linux desktop for Arch, CachyOS, Void and Fedora, on Hyprland or niri, from one repository and one signed package path.
 ---
 
 **力と美のために** : *for the sake of power and beauty.*
 
-Ryoku is a premium Arch workstation for capable desktops and laptops. It is
-pre-riced, plugin-minded, and tuned for people who want a fast, polished daily
-machine from first boot.
+Ryoku is a hand-built Linux desktop. One shell runs on
+[Hyprland](https://hypr.land/) or [niri](https://github.com/YaLTeR/niri)
+(Wayfire is experimental), on four distributions, and all of it comes from one
+repository: the desktop, the installers and the system definition.
 
-The desktop is [Hyprland](https://hypr.land/), driven by a
-[Quickshell](https://quickshell.outfoxxed.me) UI: a top bar, the launcher, a
-feature sidebar, the lock screen, and the Ryoku Settings control
-center. Capture, updates, hardware, media, and developer tools are built into the
-shell, not bolted on as tray-only scripts.
+The desktop is one continuous surface. The bar, the panels, the launcher, the
+lock screen and the session controls move together and retint from your
+wallpaper. Every setting lives in Ryoku Settings, and the `ryoku` command keeps
+the machine updated, snapshotted and healthy.
 
-{/* Add a current desktop screenshot at /assets/showcase.png and reference it here once captured. */}
+## Editions
+
+| Edition | Compositors | Get it | Status |
+|---|---|---|---|
+| Arch Linux | Hyprland, niri, Wayfire | signed ISO, or the one-line installer | stable |
+| CachyOS | Hyprland, niri, Wayfire | signed ISO, or the one-line installer | stable |
+| Void Linux (glibc, runit) | niri | signed ISO, or the one-line installer | experimental |
+| Fedora® 44 and 45 | Hyprland, niri | the one-line installer | experimental |
+
+Every edition is `x86_64` and installs the same desktop from a signed native
+repository (pacman, XBPS or RPM). A community port for NixOS lives at
+[Ryoku on NixOS](https://aethctl.github.io/Ryoku-on-NixOS/).
 
 ## Start here
 
 <CardGroup cols={2}>
-  <Card title="Install Ryoku" icon="download" href="/docs/install">
-    Boot the signed ISO, verify it, and install onto your hardware.
+  <Card title="What's new in 1.0" icon="sparkles" href="/docs/whats-new">
+    The installer choices, RyoManager, the shipped rices and everything else
+    that changed.
   </Card>
-  <Card title="Convert existing Arch" icon="right-left" href="/docs/convert">
-    Already on Arch? Turn it into a Ryoku machine with one reversible command.
+  <Card title="Install Ryoku" icon="download" href="/docs/install">
+    Boot the signed ISO, answer the installer's questions and reboot into the
+    desktop.
+  </Card>
+  <Card title="Convert a machine you have" icon="right-left" href="/docs/convert">
+    One line turns an existing Arch, CachyOS, Void or Fedora system into Ryoku.
   </Card>
   <Card title="First boot" icon="power" href="/docs/first-boot">
-    What you see after login, and where to click first.
-  </Card>
-  <Card title="Desktop tour" icon="compass" href="/docs/tour">
-    Workspaces, the bar, launcher, feature sidebar, and Ryoku Settings.
+    What happens at the first login, and where to click first.
   </Card>
 </CardGroup>
 
-## What ships
+## The keys that open almost everything
 
-- **Desktop**: a Hyprland session with a Quickshell top bar, launcher, feature sidebar, lock screen, and the Ryoku Settings control center.
-- **The `ryoku` command**: one tool for updates, rollback, status, and self-healing, backed by signed packages and, on a btrfs root, snapper snapshots wrapped around every update.
-- **Theming**: wallpaper-driven colors via matugen, plus switchable full-system themes (Ryoku Default, Catppuccin, Tokyo Night, Gruvbox, Nord, Rosé Pine, and more).
-- **Daily-driver fit**: development, content work, media, notes, terminals, and container workflows on strong hardware.
+| Keys | Opens |
+|---|---|
+| `Super + Space` | The launcher: apps, commands, files, packages and the calculator |
+| `Super + ,` | Ryoku Settings |
+| `Super + Esc` | Quick settings: session, network, sound and power |
+| `Super + W` | The Ryogami wallpaper picker |
+| `Super + K` | Kit: keybinds, commands, your phone and dev tools |
+| `Alt + Space` | Ask Rashin |
 
 ## Go deeper
 
 <CardGroup cols={2}>
-  <Card title="Navigation & windows" icon="table-columns" href="/docs/navigation">
-    Move between workspaces, tile and float windows, and drive the layout.
+  <Card title="Desktop tour" icon="compass" href="/docs/tour">
+    The bar styles, the launcher, the sidebar and Ryoku Settings.
   </Card>
-  <Card title="Ryoku Settings" icon="sliders" href="/docs/settings">
-    The Hub: panels that edit your desktop live, with undoable preview.
+  <Card title="Themes and wallpapers" icon="palette" href="/docs/theming">
+    The wallpaper palette, Ryogami and the Default and NOC rices.
   </Card>
-  <Card title="Themes & wallpapers" icon="palette" href="/docs/theming">
-    The matugen palette, the shipped themes, and the wallpaper pickers.
+  <Card title="Apps" icon="grid-2" href="/docs/apps">
+    What ships, what you can leave out, and the default apps.
   </Card>
   <Card title="The ryoku command" icon="terminal" href="/docs/cli">
-    Update, roll back, snapshot, and heal your system from one CLI.
+    Update, roll back, snapshot and heal the system from one tool.
   </Card>
 </CardGroup>
+
+<sub>Fedora is a registered trademark of Red Hat, Inc., or its subsidiaries in
+the United States and other countries. Ryoku is an independent project and is
+not affiliated with or endorsed by the Fedora Project, Arch Linux, CachyOS or
+Void Linux.</sub>

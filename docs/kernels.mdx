@@ -1,133 +1,112 @@
 ---
 title: Kernels
-description: Ryoku boots the stock Arch kernel and can add the CachyOS kernel as an opt-in from Extras, with the stock kernel kept as a fallback.
+description: Ryoku on Arch boots the stock kernel and can add the CachyOS layer at install time or later from Ryostore, keeping the stock kernel as a fallback.
 icon: microchip
 ---
 
-Ryoku ships and boots the stock Arch `linux` kernel. The Hub's **Extras** section
-can add the CachyOS kernel (`linux-cachyos`) as an opt-in alternative. This page
-is what to weigh before flipping it, what it does and does not change, and how to
-back out. Your stock kernel is never removed, so this is a low-risk toggle.
+There are three ways to run Ryoku with respect to CachyOS:
+
+| Path | What you get | Where |
+|---|---|---|
+| **Ryoku on Arch** | The stock Arch `linux` kernel and the Arch userland | Arch ISO, or the script installer on Arch |
+| **Ryoku on Arch plus the CachyOS layer** | The CachyOS kernel and tuning on top of the Arch userland, with the stock kernel kept as a boot fallback | The **CachyOS layer** question in the Arch ISO or script installer, or the **CachyOS Layer** bundle in Ryostore |
+| **The CachyOS edition** | A full CachyOS system: CachyOS's pacman, its repositories for your CPU tier, `linux-cachyos` with the CachyOS LTS kernel as fallback | The CachyOS ISO, or the script installer on CachyOS |
+
+This page is about the middle row: what the layer adds, how to get it, and how
+to back out.
+
+## What the CachyOS layer adds
+
+- The `[cachyos-v3]` repository above `[core]`, trusted through the CachyOS
+  signing key, and multilib for Proton's 32-bit libraries.
+- `linux-cachyos` and `linux-cachyos-headers`: EEVDF with `sched-ext`, Clang
+  ThinLTO and AutoFDO, the Cachy patchset, built for x86-64-v3.
+- `cachyos-settings`: CachyOS's sysctl, udev, modprobe and systemd tuning.
+- `scx-scheds`: the sched-ext userspace schedulers (bpfland, rusty, lavd).
+- `ananicy-cpp` and `cachyos-ananicy-rules`: the auto-nice daemon that keeps
+  the compositor and foreground apps responsive under load.
+- `proton-cachyos-native`: the CachyOS Proton build for Steam and Lutris.
+
+It does **not** add the baseline `[cachyos]` repository (CachyOS's forked
+pacman) or the `cachyos-core-v3` and `cachyos-extra-v3` userland rebuilds, so a
+later `pacman -Syu` cannot quietly replace your userland or your package
+manager. Your desktop, defaults and the `[ryoku]` repository stay as they were.
+
+<Warning>
+The layer needs a CPU with **x86-64-v3** support (almost every CPU since about
+2015). On a CPU without it, the installer skips the layer and says why.
+</Warning>
+
+## Get it at install time
+
+The Arch ISO asks about the CachyOS layer after the Rashin question; the script
+installer shows it as a toggle on plain Arch. Both are off by default.
+
+- It needs a network connection, also on an offline ISO. The ISO only offers it
+  while the network is up.
+- The layer is added after the desktop is installed: the repository helpers
+  run first, then one full-upgrade transaction installs the packages, so the
+  whole system is current from the network.
+- If the CachyOS mirror is unreachable or a step fails, the install carries on
+  without the layer and tells you to add it later from Ryostore.
+- The boot menu gets a CachyOS kernel entry next to the stock one.
+
+## Add it later
+
+Open Ryostore, find the **CachyOS Layer** bundle, and install all of it or pick
+single items. It adds the same repositories and packages as the installer.
+Reboot to run the new kernel; the stock kernel stays installed and bootable.
+
+<Warning>
+Installing a kernel rebuilds every DKMS module against it, so watch for NVIDIA
+build errors during the transaction. `/boot` also gains a second kernel image
+and initramfs.
+</Warning>
 
 ## Should you switch?
 
 <Tabs>
   <Tab title="Pros">
-    - An optimized, patched build: Clang ThinLTO and AutoFDO, an x86-64-v3
-      target, and the Cachy patchset.
-    - The mainline EEVDF scheduler with `sched-ext` compiled in, so you can opt
-      into a latency or gaming scheduler (`scx_lavd` and friends) via
-      `scx-scheds`.
-    - A modest, workload-dependent throughput edge on CPU-bound work, plus
-      steadier behaviour under load.
+    - An optimized, patched kernel with `sched-ext`, so you can try a latency
+      or gaming scheduler.
+    - CachyOS's system tuning and the auto-nice rules, which keep a busy
+      machine responsive.
+    - CachyOS Proton for games.
   </Tab>
   <Tab title="Cons">
-    - Pulls in the CachyOS repository and signing key, so kernel updates now
-      depend on one more upstream being healthy.
-    - Every DKMS module (NVIDIA, VirtualBox, and the like) rebuilds against the
-      new kernel. A failed rebuild means that module is missing on that kernel
-      until it is fixed.
-    - Tracks mainline more aggressively than Arch's `linux`, so marginally more
-      churn.
+    - Kernel updates now depend on one more upstream being healthy.
+    - Every DKMS module rebuilds against the new kernel; a failed rebuild means
+      that module is missing on that kernel until it is fixed.
+    - The CachyOS kernel tracks mainline more closely than Arch's `linux`.
   </Tab>
 </Tabs>
 
 The gain is real for gamers and heavy multitaskers; a light desktop will barely
-notice it. Whatever you decide, your stock Arch kernel stays installed and
-remains the safe fallback you can always boot.
-
-<Warning>
-  The CachyOS kernel requires a CPU that supports **x86-64-v3** (essentially
-  every CPU since roughly 2015). The installer refuses to add the repo on a CPU
-  that does not.
-</Warning>
-
-## Enable it
-
-<Steps>
-  <Step title="Open Extras">
-    Ryoku Settings (`Mod+,`) > **Store / Extras**, then find **CachyOS Kernel**.
-  </Step>
-  <Step title="Install the bundle">
-    Install it like any other Extras bundle. Under the hood the Hub runs
-    `ryoku-extras-install`, which adds the `[cachyos-v3]` repository (signing the
-    CachyOS key and inserting the repo above `[core]`) and installs
-    `linux-cachyos` and `linux-cachyos-headers`.
-  </Step>
-  <Step title="Reboot">
-    A reboot is required to actually run the new kernel. On a Ryoku install the
-    Limine boot entries regenerate automatically when the kernel package lands,
-    so `linux-cachyos` appears in the boot menu and the stock kernel stays the
-    default.
-  </Step>
-</Steps>
-
-Prefer the terminal? `ryoku-extras-install install bundle cachyos-kernel` does
-the same thing. See [Extras](/docs/extras) for how bundles work.
-
-<Warning>
-  Installing the kernel rebuilds every DKMS module against it, so watch for
-  NVIDIA build errors during the transaction. `/boot` also gains a second kernel
-  image and initramfs, so it uses more space.
-</Warning>
-
-## What changes, and what doesn't
-
-Ryoku adds **only** the `[cachyos-v3]` repository and installs the kernel. That
-repo holds CachyOS's own packages rather than rebuilds of Arch's `core` and
-`extra`, so the kernel is the only thing sourced from CachyOS. Deliberately left
-out:
-
-- The baseline `[cachyos]` repo (which ships CachyOS's forked pacman).
-- The `cachyos-core-v3` / `cachyos-extra-v3` userland rebuilds.
-
-That means a later `pacman -Syu` cannot quietly replace your userland or your
-package manager. Your desktop, defaults, apps, and the `[ryoku]` repo are exactly
-as before; you have simply borrowed a kernel. Kernel updates flow through the
-normal [`ryoku update`](/docs/updates) run, snapshots and all.
-
-## Is it still Ryoku?
-
-Yes. A distribution is defined by its desktop, tooling, repository, and defaults,
-not by which kernel it boots. Installing `linux-cachyos` is the same kind of
-choice as `linux-zen` or `linux-lts`: one swappable component. The system stays
-Ryoku, on the Arch base, with the `[ryoku]` desktop, the `ryoku` CLI, and the
-same opinionated defaults. `/etc/os-release` still reads exactly as before.
-
-Opinionated does not mean fixed. The Ryoku *default* is opinionated: a fresh
-install boots the stock Arch kernel, and that choice is ours to make. The CachyOS
-kernel is an explicit opt-in, never the default. Offering the toggle does not
-dilute the default install; it hands a power user one clearly labelled lever and
-leaves everyone else exactly where they were.
-
-<Note>
-  This is not a full CachyOS install. CachyOS's own ISO gives you their entire
-  optimized userland, their pacman fork, and their branding, a CachyOS system,
-  not Ryoku's shell and Hub. The toggle exists so you can get the kernel's
-  benefit without giving up the thing that makes the machine Ryoku.
-</Note>
+notice it.
 
 ## Rollback
 
-Rollback is built in and cheap:
+- **Boot the stock kernel.** The stock Arch kernel is never removed. Pick its
+  entry in the Limine menu and you are back.
+- **Recover the whole transaction.** Installing the layer is a pacman
+  transaction, so snapper and snap-pac take a pre and post snapshot pair and
+  limine-snapper-sync lists them in the boot menu. See [Updates](/docs/updates).
+- **Remove it.** Remove the bundle's items in Ryostore. The `[cachyos-v3]`
+  repository line stays in `/etc/pacman.conf`; it is inert with no CachyOS
+  packages installed, so delete it by hand only if you want a clean file.
 
-- **Just boot the stock kernel.** The stock Arch kernel is never removed. If the
-  CachyOS kernel misbehaves, pick the stock entry at the Limine menu and you are
-  back. There is nothing to undo.
-- **Recover the whole transaction.** Installing the kernel is a pacman
-  transaction, so snapper and snap-pac take a pre/post snapshot pair and
-  limine-snapper-sync exposes them in the boot menu; a whole bad transaction is
-  recoverable from the boot screen. See [Updates](/docs/updates).
-- **Remove it outright.** In Ryoku Settings > Extras > **CachyOS Kernel**, choose
-  remove, or run `ryoku-pkg-remove linux-cachyos linux-cachyos-headers`. The
-  `[cachyos-v3]` repo line is left in place; it is inert with no CachyOS packages
-  installed, so delete it by hand only if you want a spotless `pacman.conf`.
+## Is it still Ryoku?
+
+Yes. A distribution is defined by its desktop, tooling, repository and
+defaults, not by the kernel it boots. With the layer the system stays Ryoku on
+the Arch base, with the `[ryoku]` desktop, the `ryoku` CLI and the same
+defaults. If you want CachyOS underneath, install the CachyOS edition instead.
 
 ## See also
 
 <CardGroup cols={2}>
-  <Card title="Extras" icon="box-open" href="/docs/extras">
-    How the Extras bundles install, update, and remove software.
+  <Card title="Install Ryoku" icon="download" href="/docs/install">
+    The installer questions, including the CachyOS layer.
   </Card>
   <Card title="Updates" icon="arrows-rotate" href="/docs/updates">
     Snapshots, the boot-menu recovery path, and how updates stay reversible.
