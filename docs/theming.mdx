@@ -1,13 +1,13 @@
 ---
 title: Themes & wallpapers
-description: How Ryoku recolors the whole desktop from your wallpaper, the shipped themes, and how to switch.
+description: How Ryoku recolors the whole desktop from your wallpaper, the built-in color schemes, wallpapers and rices.
 icon: palette
 ---
 
 Ryoku has one coherent look, and it takes its color from your wallpaper. Set a
 wallpaper and the terminal, the compositor, and the shell all recolor to match,
 with no per-app theming and no mismatched palettes. Prefer a fixed palette? Pick
-one of the shipped themes and lock to it.
+one of the built-in color schemes and lock to it.
 
 ## How colors work
 
@@ -18,95 +18,91 @@ it, and write that palette into every surface at once.
 | --- | --- |
 | Kitty (terminal) | `~/.config/kitty/current-theme.conf` |
 | Hyprland (compositor) | `~/.cache/ryoku/hypr-colors.lua` |
+| Qt apps | `~/.config/qt6ct/colors/ryoku.conf` |
+| btop and Fastfetch | `~/.config/btop/themes/ryoku.theme`, `~/.config/fastfetch/ryoku-colors.json` |
 | The shell (bar, launcher, widgets) | `~/.cache/ryoku/colors.json` |
 
-That palette is either **followed** or **locked**, controlled by the *Match
-wallpaper* toggle:
+That palette has three behaviours, set in the wallpaper picker (`Mod + W`,
+then `Shift + S` for its settings) under **Theme > Palette behaviour**:
 
-- **Follow** (default) — colors regenerate from each new wallpaper. Change the
-  wallpaper, change the whole system's colors.
-- **Lock** — colors come from the selected theme's fixed palette and stay put no
-  matter which wallpaper you set.
-
-The toggle lives in **Ryoku Settings → Shell → Match wallpaper** (open Settings
-with `Mod + ,`). Theme selection itself is in the **Appearance** panel.
+- **Follow wallpaper** (default): colors regenerate from each new wallpaper.
+  Change the wallpaper, change the whole system's colors.
+- **Fixed palette**: colors come from the scheme picked under **Palette >
+  Theme** and stay put whatever wallpaper you set.
+- **Keep current colours**: nothing changes until you switch back.
 
 <Tip>
 Only the *accent* follows the wallpaper. The brand vermillion, the red-sun
 motif, and the 力 mark stay fixed on every wallpaper, so a sun is always a sun.
 </Tip>
 
-## Full-system themes
+## Color schemes
 
-A theme is more than colors: each one tunes rounding, blur, gaps, shadows,
-opacity, and motion into a complete look. Some carry a fixed palette; others
-stay wallpaper-driven and only reshape the motion and decoration.
+With **Fixed palette** on, **Palette > Theme** lists the built-in schemes:
+Catppuccin Mocha, Dracula, Everforest Dark Medium, Gruvbox Dark Medium,
+Kanagawa Wave, Nord Dark, One Dark, Rosé Pine, Solarized Dark and Tokyo Night.
 
-| Theme | Vibe | Palette |
-| --- | --- | --- |
-| **Ryoku Default** (`default`) | Warm, glassy, the shipped look | Wallpaper-driven |
-| **Tokyo Night** (`tokyo-night`) | Deep blue-purple night, sharp and snappy | Fixed |
-| **Catppuccin** (`catppuccin`) | Mocha: soft pastel mauve on dark | Fixed |
-| **Gruvbox** (`gruvbox`) | Warm retro earth tones, high-contrast | Fixed |
-| **Nord** (`nord`) | Cool arctic minimalism, frost blues | Fixed |
-| **Rosé Pine** (`rose-pine`) | Muted, elegant, a little romantic | Fixed |
-| **Aqua** (`aqua`) | Apple-style liquid glass: big rounding, heavy frost | Fixed |
-| **Washi** (`washi`) | Vermilion on dark washi paper, snappy | Fixed |
-| **Soft Color** (`soft_color`) | Pastel peach on slate-blue, dreamy and blurred | Fixed |
-| **Mountains** (`mountains`) | Desaturated stone, moss, and bone | Fixed |
-| **Glass** (`glass`) | Heavy frosted blur, translucent windows | Wallpaper-driven |
-| **Drift** (`drift`) | Airy: wide gaps, soft blur, unhurried motion | Wallpaper-driven |
-| **CRT** (`crt`) | Cyan phosphor on near-black, retro terminal | Fixed |
-| **Cassette** (`cassette`) | Flat sepia, sharp corners, ink on bone | Fixed |
-| **Compact** (`compact`) | Dense and tight, minimal rounding | Wallpaper-driven |
+Schemes installed from Ryostore join the list, and so do palettes you save in
+the **Theme designer**, which edits each interface color on a color wheel with
+a live preview. **Custom seeds** builds a full palette from a few hex colors of
+your own. **App themes**, on the same tab, recolors supported desktop apps
+from the palette as well.
 
-`default` is Ryoku Default, the warm, wallpaper-driven look you get out of the
-box.
-
-## Switching a theme
+## Switching a scheme
 
 <Steps>
-  <Step title="Open Ryoku Settings">
-    Press `Mod + ,` to open the Hub.
+  <Step title="Open the picker's settings">
+    Press `Mod + W` for the wallpaper picker, then `Shift + S`, and open the
+    **Theme** tab.
   </Step>
-  <Step title="Go to Appearance">
-    Select the **Appearance** panel and pick a theme. Changes preview live.
+  <Step title="Lock the palette">
+    Set **Palette behaviour** to **Fixed palette**.
   </Step>
-  <Step title="Decide on colors">
-    A fixed-palette theme locks its own colors. To keep colors following your
-    wallpaper instead, leave *Match wallpaper* on in the **Shell** panel.
+  <Step title="Pick a scheme">
+    Choose one under **Palette > Theme** and the desktop recolors to it. Set
+    **Palette behaviour** back to **Follow wallpaper** to let the wallpaper
+    drive the colors again.
   </Step>
 </Steps>
 
-## Wallpapers
+## Wallpapers and Ryogami
 
-Wallpapers live in `~/Pictures/Wallpapers`, and a shipped set is installed for
-you.
+Ryogami is the wallpaper picker and daemon. Wallpapers live in
+`~/Pictures/Wallpapers`, and a shipped set is installed for you.
 
 | Key | Action |
 | --- | --- |
-| `Mod + W` | Wallpaper and theme menu (browse wallpapers, live wallpapers, colour filters, and themes) |
-| `Mod + Shift + W` | Next / random wallpaper, with an animated transition |
+| `Mod + W` | Open the wallpaper picker |
+| `Mod + Shift + W` | Random wallpaper, with an animated transition |
+| `Ctrl + D` in the picker | The download browser: Wallhaven, Steam Workshop, Unsplash, Pexels and more |
 
-With *Match wallpaper* on, every wallpaper change recolors the whole desktop.
+- **Picker styles.** Slices, depth, hex, wall, sandy, hand, collection and
+  duel. A fresh profile opens a wide slices picker with the Ash flip and a
+  gentle wobble, at 1.2x scale; small screens get smaller slices.
+- **Targets.** A wallpaper can go on every display, one display or one
+  workspace (**All**, **This monitor**, **This workspace**).
+- **Image optimisation.** New PNG, JPEG and GIF wallpapers are re-encoded to
+  WebP when they arrive, with the quality preset. The original goes to
+  Ryogami's trash for a few days. Turn it off under **Settings > Library >
+  Images & recovery > Auto-optimise new images**.
 
-## Ryowalls
+With **Follow wallpaper** on, every wallpaper change recolors the whole
+desktop.
 
-The wallpaper and theme menu (`Mod + W`) includes **Ryowalls**, an in-desktop
-browser for [wallhaven.cc](https://wallhaven.cc).
+## Rices
 
-<Steps>
-  <Step title="Browse">
-    Search wallhaven from inside Ryoku.
-  </Step>
-  <Step title="Preview live">
-    Highlight a wallpaper and the whole rice previews live, colors and all.
-  </Step>
-  <Step title="Apply">
-    Apply it, and Ryoku saves a per-image color tune so it looks right every
-    time you return to it.
-  </Step>
-</Steps>
+A rice is a saved look: the wallpaper, the shell and bar settings, the
+compositor look, the widgets, the Fastfetch style and the palette. Rices live
+in the wallpaper picker's **Rices** tab.
+
+- **Default and NOC ship with Ryoku**, each with its wallpaper and preview. A
+  fresh install applies Default at the first login and keeps its wallpaper.
+- **Save your own.** Saving captures the current wallpaper and a preview. If
+  Ryogami has optimised the wallpaper since you set it, the saved rice picks up
+  the WebP copy.
+- **Apply, export and import.** Applying a rice snapshots your current setup
+  first, so going back is one click. Rices export to a file you can share and
+  import on another machine.
 
 ## The fixed brand
 
@@ -125,7 +121,7 @@ fallback (including CJK). The cursor is **Bibata**.
 
 <CardGroup cols={2}>
   <Card title="Ryoku Settings" icon="sliders" href="/docs/settings">
-    The Hub: Appearance, Shell, and every other panel.
+    Bar Studio, Desktop, Animations and every other page.
   </Card>
   <Card title="Customize" icon="wrench" href="/docs/customize">
     Go deeper: user overrides, config files, and dotfiles.
