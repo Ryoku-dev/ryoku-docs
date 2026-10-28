@@ -1,0 +1,55 @@
+---
+title: Subshells & barstyles
+description: Understand the difference between a Ryoku bar style and a full shell experience, and how to submit either to RyoStore.
+icon: panels-top-left
+---
+
+Both options change how you interact with the Ryoku desktop, but they are not the same kind of product.
+
+| | Barstyle | Subshell |
+| --- | --- | --- |
+| Main purpose | Change the desktop bar and its attached controls | Offer a broader, coordinated shell experience |
+| Typical scope | Bar layout, widgets, popouts, status surfaces | Bar plus its own interacting panels, navigation, and optional companion surfaces |
+| Shared services | Uses Ryoku's existing system state and shell services | Must still integrate with Ryoku's existing services rather than duplicating them |
+| Window manager | Uses the active Ryoku window manager | Uses the active Ryoku window manager |
+| Choice in Ryoku | **Bar Studio** | **Subshells** page |
+| Current setting | `barStyle` in `~/.config/ryoku/shell.json` | The same `barStyle` key today |
+
+A subshell is **not** another Linux distribution, compositor, display manager, or a replacement for the Ryoku service stack. It is a more complete interface running inside Ryoku. A barstyle can have elaborate popouts without automatically becoming a subshell. The distinction is about the scope of the experience and how its components work together, not the number of animations.
+
+## Barstyles
+
+Choose a barstyle when you want a different bar, widget layout, visual treatment, or the panels attached to that bar. It should respect Ryoku's existing media, window-management, notification and configuration services, and avoid launching a duplicate resident daemon for a service Ryoku already provides.
+
+Open **Ryoku Settings > Desktop > Bar Studio** to select a style and configure supported layouts and widgets. The available controls depend on the selected product.
+
+## Subshells
+
+Choose a subshell when the bar is only one part of a coordinated shell interface, such as a family of panels, menus, popouts, and workspace controls designed to operate together.
+
+Open **Ryoku Settings > Desktop > Subshells** to browse the available experiences. In the current implementation the page reuses the barstyle activation and save/revert mechanism. The recognized built-in IDs are `gokko`, `caelestia`, `tansu`, and `python`. This is an implementation detail, not a promise that every external shell will be detected automatically.
+
+A subshell must specify which Ryoku services it consumes, which surfaces it owns, how it starts and stops, and how it avoids conflicts with other shell components. It cannot silently replace global notification, authentication, or session services.
+
+<Warning>
+  Subshells and barstyles currently share the `barStyle` configuration key and some package machinery. Treat them as separate **product concepts**, not independent runtime switches. Activating one replaces the other in the current shell selection.
+</Warning>
+
+## Submitting to RyoStore
+
+Submit a **barstyle** using the ordinary [RyoStore submission form](https://github.com/Ryoku-dev/ryostore/issues/new?template=submit-item.yml). Submit a **subshell** using the dedicated [subshell submission form](https://github.com/Ryoku-dev/ryostore/issues/new?template=submit-subshell.yml).
+
+The subshell form asks for the entry point, owned surfaces, use of Ryoku's service APIs, dependencies, install and removal behaviour, permissions, compositor coverage, and test evidence. That extra detail matters because a subshell has a larger integration and security footprint than a bar.
+
+Until RyoStore has a separately implemented `subshells` catalogue and installer contract, maintainers must review the actual compatibility and packaging requirements rather than assuming a new folder type will work automatically.
+
+## Related pages
+
+<CardGroup cols={2}>
+  <Card title="Settings" icon="sliders" href="/docs/settings">
+    Where Bar Studio and Subshells live in the Hub.
+  </Card>
+  <Card title="Customize" icon="wrench" href="/docs/customize">
+    The config layering and user overrides behind the shell.
+  </Card>
+</CardGroup>
