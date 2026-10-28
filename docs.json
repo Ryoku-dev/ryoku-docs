@@ -86,7 +86,8 @@
               "docs/tour",
               "docs/navigation",
               "docs/keybindings",
-              "docs/settings"
+              "docs/settings",
+              "docs/subshells-and-barstyles"
             ]
           },
           {
